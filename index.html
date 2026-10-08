@@ -16,10 +16,11 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{word-break:keep-all;overflow-wrap:anywhere}
 button,select{font:inherit;color:inherit}
 button{cursor:pointer}
 button:disabled{cursor:default}
-.mono{font-family:var(--mono);font-size:.94em;letter-spacing:-.1px}
+.mono{font-family:var(--mono);font-size:.94em;letter-spacing:-.1px;word-break:break-all}
 .dim{color:var(--muted)}
 .i{display:inline-block;vertical-align:-1px;flex:none}
 
@@ -246,7 +247,7 @@ select.tb{padding:0 8px;width:270px;text-overflow:ellipsis}
 .more{margin:5px 0 0 52px;font-size:12px;color:#5d6d80}
 .det{margin:8px 0 2px 52px;width:calc(100% - 52px);border-collapse:collapse;font-size:12px;background:#fff;border:1px solid #e6eaef;border-radius:8px;cursor:auto}
 .det th{width:1%;white-space:nowrap;text-align:left;vertical-align:top;font-weight:600;color:var(--ink2);padding:5px 10px;border-bottom:1px solid #f0f2f5}
-.det td{vertical-align:top;padding:5px 10px 5px 0;border-bottom:1px solid #f0f2f5;word-break:break-all;line-height:1.45}
+.det td{vertical-align:top;padding:5px 10px 5px 0;border-bottom:1px solid #f0f2f5;line-height:1.45}
 .det td.r{width:1%;white-space:nowrap;text-align:right}
 .vy{color:var(--ok);font-weight:800}
 .vn{color:var(--bad);font-weight:800}
@@ -327,39 +328,39 @@ dialog#counter{width:min(520px,94vw)}
     <h4>이 화면</h4>
     <p>폰을 바꿀 때 옛 폰의 모바일신분증과 새 폰 얼굴 인증으로 새 폰에 신분증을 다시 받는 과정(신분증 이어받기)을 시험해 보는 시뮬레이터입니다. 실제 모바일 신분증 앱이 아니고 정부 시스템과도 연결되지 않습니다. 인물(김민수, 1958년생)과 날짜는 모두 가상입니다.</p>
     <ul>
-      <li><b>옛 폰</b> — 지금 신분증이 들어 있는 폰(쓰던 폰)</li>
-      <li><b>새 폰</b> — 신분증을 받을 폰</li>
-      <li><b>공통기반 기록</b> — 모바일 신분증 중앙 시스템 역할. 무엇을 검사했는지 시간순으로 남깁니다. 줄을 누르면 실제 서명값(16진수 앞부분)과 검증 결과가 펼쳐집니다. 빨간 칸이 막힌 검사입니다.</li>
+      <li><b>옛 폰</b>: 지금 신분증이 들어 있는 폰(쓰던 폰)</li>
+      <li><b>새 폰</b>: 신분증을 받을 폰</li>
+      <li><b>공통기반 기록</b>: 모바일 신분증 중앙 시스템 역할. 무엇을 검사했는지 시간순으로 남깁니다. 줄을 누르면 실제 서명값(16진수 앞부분)과 검증 결과가 펼쳐집니다. 빨간 칸이 막힌 검사입니다.</li>
     </ul>
     <h4>쓰는 법</h4>
     <ul>
       <li>위에서 시나리오를 고르고, 주황 테두리가 생긴 버튼을 차례로 누릅니다. 이어받기는 새 폰에서 먼저 시작합니다.</li>
       <li>「자동 시연」은 1.5초마다 한 단계씩 저절로 진행합니다(다시 누르면 멈춤). 「+72시간」「+30일」「+3년」은 가상 시계를 앞으로 돌립니다.</li>
-      <li>「분실 신고 창구에서 되돌리기」는 옛 폰이 없을 때 창구에서 되돌리는 경우입니다(이어받은 지 72시간 안일 때만 누를 수 있음).</li>
+      <li>「분실 신고 창구에서 되돌리기」는 옛 폰이 없을 때(보상판매 등) 누리집·콜센터·주민센터에서 본인 확인 뒤 새 폰 신분증을 폐기하는 경우입니다(신분증은 방문·IC로 다시 받음, 이어받은 지 72시간 안일 때만 누를 수 있음).</li>
     </ul>
     <h4>시나리오</h4>
     <ul>
       <li>① 정상 이어받기</li>
-      <li>② 다른 사람이 내 명의로 시도 → 얼굴 불일치로 거절 — QR도 뜨지 않고, 옛 폰에 시도 알림</li>
+      <li>② 다른 사람이 내 명의로 시도 → 얼굴 불일치로 거절: QR도 뜨지 않고, 옛 폰에 시도 알림</li>
       <li>③ 옛 폰 분실 → 방문·IC 안내</li>
-      <li>④ 30일 안에 또 이어받기 → 거절 — 30일이 지나면 됨</li>
-      <li>⑤ 대면 확인 6년 상한 — 이어받아도 만료일은 대면 확인 후 6년까지, 그때가 되면 갱신 대신 방문(IC 주민등록증 전환 안내)</li>
-      <li>⑥ 72시간 안 「내가 하지 않았어요」 — 새 폰 신분증 폐기, 옛 폰에 다시 발급</li>
+      <li>④ 30일 안에 또 이어받기 → 거절: 30일이 지나면 됨</li>
+      <li>⑤ 대면 확인 6년 상한: 이어받아도 만료일은 대면 확인 후 6년까지, 그때가 되면 갱신 대신 방문(IC 주민등록증 전환 안내)</li>
+      <li>⑥ 72시간 안 「내가 하지 않았어요」: 새 폰 신분증 폐기, 옛 폰에 다시 발급</li>
       <li>⑦ 만료 60일 전 → 3년 갱신</li>
-      <li>⑧ 멀리서 승인 시도 → 근거리 확인에서 거절(얼굴은 통과했다고 가정한 경우) — QR 화면을 캡처해 보내 옛 폰으로 찍게 해도 두 폰이 떨어져 있어 막힘</li>
+      <li>⑧ 멀리서 승인 시도 → 근거리 확인에서 거절(얼굴은 통과했다고 가정한 경우): QR 화면을 캡처해 보내 옛 폰으로 찍게 해도 두 폰이 떨어져 있어 막힘</li>
     </ul>
     <h4>공통기반이 하는 다섯 가지 확인 (이어받기 요청)</h4>
     <ol>
-      <li>옛 신분증 확인 — 옛 신분증 서명, 유효기간, 정지·폐기 아님</li>
-      <li>옛 폰 승인 확인 — 승인 서명, 1회용 번호</li>
-      <li>본인 확인 — 얼굴 일치(공통기반 대조), 명의 일치</li>
-      <li>근거리 확인 — 두 폰 가까이(블루투스)</li>
-      <li>이용 규칙 — 72시간 보호, 30일 제한, 6년 상한</li>
+      <li>옛 신분증 확인: 옛 신분증 서명, 유효기간, 정지·폐기 아님</li>
+      <li>옛 폰 승인 확인: 승인 서명, 1회용 번호</li>
+      <li>본인 확인: 얼굴 일치(공통기반 대조), 명의 일치</li>
+      <li>근거리 확인: 두 폰 가까이(블루투스)</li>
+      <li>이용 규칙: 72시간 보호, 30일 제한, 6년 상한</li>
     </ol>
     <p class="hnote">얼굴은 새 폰에서 찍자마자 공통기반이 먼저 대조하고, 맞을 때만 새 폰에 QR이 뜹니다.</p>
-    <h4>진짜로 도는 것과 흉내 낸 것</h4>
+    <h4>실제로 동작하는 것과 시뮬레이션</h4>
     <ul>
-      <li><b>진짜</b>: 전자서명과 검증. 브라우저에 들어 있는 암호 기능(WebCrypto)으로 ECDSA P-256(지금 널리 쓰는 타원곡선 전자서명)과 SHA-256을 씁니다. 가상 발급기관·공통기반·옛 폰·새 폰이 각자 열쇠를 만들고, 폰 열쇠의 비밀 부분은 밖으로 꺼낼 수 없게 만듭니다.</li>
+      <li><b>실제</b>: 전자서명과 검증. 브라우저에 들어 있는 암호 기능(WebCrypto)으로 ECDSA P-256(지금 널리 쓰는 타원곡선 전자서명)과 SHA-256을 씁니다. 가상 발급기관·공통기반·옛 폰·새 폰이 각자 열쇠를 만들고, 폰 열쇠의 비밀 부분은 밖으로 꺼낼 수 없게 만듭니다.</li>
       <li><b>시뮬레이션</b>: 얼굴 인증, 본인 명의 확인, 블루투스 근거리 확인, 창구 본인 확인. 버튼이나 시나리오 설정으로 결과를 정합니다. 공통기반 기록에서 점선 칸이 시뮬레이션 결과입니다. ⑧의 「가정」 표시는 얼굴 인증이 뚫렸다고 보고 진행한다는 뜻입니다.</li>
       <li><b>QR</b>은 모양만 흉내 냈고 「QR 촬영」 버튼으로 연결합니다. 연결 코드에는 새 폰 공개키 지문(열쇠를 줄인 값)과 1회용 번호가 들어 있습니다.</li>
     </ul>
@@ -411,7 +412,7 @@ const enc = s => new TextEncoder().encode(s);
 const hex = b => Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('');
 const unhex = h => { const a = new Uint8Array(h.length >> 1); for (let i = 0; i < a.length; i++) a[i] = parseInt(h.substr(i * 2, 2), 16); return a; };
 const rand = n => hex(crypto.getRandomValues(new Uint8Array(n)));
-function canon(v) { // 키를 정렬한 JSON — 서명 대상 바이트를 언제나 같게
+function canon(v) { // 키를 정렬한 JSON(서명 대상 바이트를 언제나 같게)
   if (v === null || typeof v !== 'object') return JSON.stringify(v);
   if (Array.isArray(v)) return '[' + v.map(canon).join(',') + ']';
   return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
@@ -458,14 +459,14 @@ const SC = {
   2: { t: '② 다른 사람이 내 명의로 시도 → 얼굴 불일치로 거절', s: '얼굴이 다르면 QR이 뜨지 않고, 내 폰에 알림이 옵니다' },
   3: { t: '③ 옛 폰 분실 → 방문·IC 안내', s: '이어줄 신분증이 없으면 지금처럼 방문하거나 IC 카드로' },
   4: { t: '④ 30일 안에 또 이어받기 → 거절', s: '이어받기는 30일에 한 번' },
-  5: { t: '⑤ 대면 확인 6년 상한', s: '실물 신분증으로 6년마다 다시 확인 — 만료일도 그 안으로' },
+  5: { t: '⑤ 대면 확인 6년 상한', s: '실물 신분증으로 6년마다 다시 확인, 만료일도 그 안으로' },
   6: { t: '⑥ 72시간 안 「내가 하지 않았어요」', s: '72시간 안이면 옛 폰의 되돌리기 열쇠로 되돌립니다' },
   7: { t: '⑦ 만료 60일 전 → 3년 갱신', s: '알림을 받고 같은 폰에서 갱신' },
   8: { t: '⑧ 멀리서 승인 시도 → 근거리 확인에서 거절(얼굴은 통과했다고 가정한 경우)', s: 'QR 화면을 캡처해 보내도 두 폰이 떨어져 있으면 막힙니다' },
 };
 
 /* ───────── 공통기반 ───────── */
-// 지금 신분증으로 쓸 수 있는(정상·유효기간 안) 것의 개수 — 언제나 1개 이하여야 함
+// 지금 신분증으로 쓸 수 있는(정상·유효기간 안) 것의 개수. 언제나 1개 이하여야 함
 function activeNow() { let n = 0; for (const c of H.creds.values()) if (c.status === 'active' && S.now < Date.parse(c.payload.expiresAt)) n++; return n; }
 function hubLog(e, at) { e.id = ++H.seq; e.at = at === undefined ? S.now : at; H.log.push(e); H.maxActive = Math.max(H.maxActive, activeNow()); return e; }
 const cap6 = lip => addY(lip, 6);
@@ -544,14 +545,14 @@ const findHolder = owner => [S.old, S.nw].find(x => x && x.cred && x.cred.payloa
 // 이어받기 준비 · 얼굴 대조: 새 폰이 찍은 얼굴을 공통기반이 바로 명의자 주민등록 사진과 대조. 맞을 때만 1회용 번호(→ QR)
 function hubPrepare(d, owner, face) {
   const photo = PHOTOS[pkey(owner)]; const ok = !!photo && face === photo; const assumed = S.assumeFace;
-  const note = assumed ? '통과(가정 — 얼굴 인증이 뚫렸다고 보는 경우)' : ok ? `${mask(owner.name)} 주민등록 사진과 같은 사람` : `${mask(owner.name)} 주민등록 사진과 다른 사람`;
+  const note = assumed ? '통과(가정: 얼굴 인증이 뚫렸다고 보는 경우)' : ok ? `${mask(owner.name)} 주민등록 사진과 같은 사람` : `${mask(owner.name)} 주민등록 사진과 다른 사람`;
   const checks = [{ n: '얼굴 일치(공통기반 대조)', ok, sim: true, note }];
   const D = [['명의 확인 결과', `${mask(owner.name)} 명의 (시뮬레이션)`], ['얼굴 대조', `새 폰 촬영본 ↔ ${photo || '-'} · ${ok ? (assumed ? '통과(가정)' : '같은 사람') : '다른 사람'} (시뮬레이션)`],
     ['새 폰 공개키 지문', mono(fpS(d.keys.fp))]];
   if (!ok) {
     const victim = findHolder(owner); if (victim && victim !== d) victim.alert = { at: S.now };
     hubLog({ kind: 'prepare', ok: false, title: '이어받기 준비 · 얼굴 대조', checks,
-      result: `거절 — 얼굴 일치(공통기반 대조): ${note} · QR 안 띄움${victim && victim !== d ? ' · 명의자 폰에 알림' : ''}`,
+      result: `거절 · 얼굴 일치(공통기반 대조): ${note} · QR 안 띄움${victim && victim !== d ? ' · 명의자 폰에 알림' : ''}`,
       details: D, data: { attemptPhoneKeyFp: d.keys.fp } });
     return null;
   }
@@ -624,7 +625,7 @@ async function hubTransfer(pkt, tamperNote) {
   }
   hubLog({ kind: 'transfer', ok, badge: '발급', title: '이어받기 요청', checks: R.checks,
     result: ok ? '새 폰에 발급 · 옛 폰 신분증은 바로 폐기 목록 · 옛 폰엔 되돌리기 열쇠(72시간) · 두 번호로 문자 알림' + (isCapped(newCred.payload) ? ' · 만료일 대면확인+6년으로 맞춤' : '')
-      : `거절 — ${R.failed.n}: ${R.failed.note}` + (R.failed.n === '1회용 번호' ? '' : ' · 옛 번호로 문자 알림'),
+      : `거절 · ${R.failed.n}: ${R.failed.note}` + (R.failed.n === '1회용 번호' ? '' : ' · 옛 번호로 문자 알림'),
     details: D, data: { cred, oldPhoneSpki: oldSpki, approval, approvalSig, newCred, undoKey, tamper: tamperNote || null } });
   return { ok, failed: R.failed, why: why(R.failed), visit: !!R.failed && VISIT.includes(R.failed.n), six: !!R.failed && (R.failed.n === '6년 상한' || (R.failed.n === '유효기간' && isCapped(p))), newCred, undoKey };
 }
@@ -645,7 +646,7 @@ async function hubPresent({ cred, spki, req, sig }) {
   if (info.h) { D.push(['폰 공개키 지문', mono(fpS(info.h.fp)), info.h.bind ? '일치' : '불일치']); D.push(vrow('폰 서명', sig, info.h.ok)); }
   D.push(['1회용 번호', hx(req.nonce, 16)]);
   hubLog({ kind: 'present', ok, badge: '확인', title: `제출 확인 · ${req.purpose}`, checks: R.checks,
-    result: ok ? '확인 완료' : `거절 — ${R.failed.n}: ${R.failed.note}`, details: D, data: { cred, phoneSpki: spki, request: req, signature: sig } });
+    result: ok ? '확인 완료' : `거절 · ${R.failed.n}: ${R.failed.note}`, details: D, data: { cred, phoneSpki: spki, request: req, signature: sig } });
   return { ok, failed: R.failed, why: why(R.failed) };
 }
 
@@ -678,7 +679,7 @@ async function hubUndo({ undoKey, spki, req, sig }) {
     D.push(vrow('다시 발급 서명', restored.sig, rOk));
   }
   hubLog({ kind: 'undo', ok, badge: '되돌림', title: '되돌리기 요청 · 내가 하지 않았어요', checks: R.checks,
-    result: ok ? '새 폰 신분증 바로 폐기 · 옛 폰 열쇠에 다시 발급 · 두 번호로 문자 알림' : `거절 — ${R.failed.n}: ${R.failed.note}`,
+    result: ok ? '새 폰 신분증 바로 폐기 · 옛 폰 열쇠에 다시 발급 · 두 번호로 문자 알림' : `거절 · ${R.failed.n}: ${R.failed.note}`,
     details: D, data: { undoKey, phoneSpki: spki, request: req, signature: sig, newCred: restored } });
   return { ok, failed: R.failed, why: why(R.failed), restored };
 }
@@ -704,7 +705,7 @@ async function hubCounterUndo(identityOk) {
   if (cand) D.push(['되돌리기 대상', `${cand.payload.oldCredId} → ${cand.payload.newCredId}`]);
   if (ok) D.push(['처리', `${cand.payload.newCredId}(새 폰) 폐기 · 되돌리기 열쇠 ${cand.payload.id} 사용 처리`]);
   hubLog({ kind: 'counter', ok, badge: '되돌림', title: '분실 신고 창구 · 되돌리기', checks: R.checks,
-    result: ok ? '새 폰 신분증 바로 폐기 · 옛 폰이 없으니 신분증은 방문하거나 IC 주민등록증으로 다시 받기 · 두 번호로 문자 알림' : `거절 — ${R.failed.n}: ${R.failed.note}`,
+    result: ok ? '새 폰 신분증 바로 폐기 · 옛 폰이 없으니 신분증은 방문하거나 IC 주민등록증으로 다시 받기 · 두 번호로 문자 알림' : `거절 · ${R.failed.n}: ${R.failed.note}`,
     details: D, data: cand ? { undoKey: { payload: cand.payload, sig: cand.sig } } : null });
   return { ok, failed: R.failed };
 }
@@ -724,7 +725,7 @@ async function hubRenew({ cred, spki, req, sig }) {
       return { ok, note: `만료 ${left}일 전 (60일 전부터 가능)`, why: '갱신은 만료 60일 전부터 돼요' }; }],
     ['6년 상한', async () => { const l = Date.parse(p.lastInPersonAt), lim = cap6(l), ne = Math.min(addY(S.now, 3), lim);
       const ok = ne > Date.parse(p.expiresAt);
-      return { ok, note: ok ? `새 만료일 ${fDate(ne)}${ne === lim ? ' (대면 확인+6년으로 맞춤)' : ''}` : `마지막 대면 확인 ${fDate(l)} · 6년 상한 ${fDate(lim)} — 더 늘릴 수 없음`,
+      return { ok, note: ok ? `새 만료일 ${fDate(ne)}${ne === lim ? ' (대면 확인+6년으로 맞춤)' : ''}` : `마지막 대면 확인 ${fDate(l)} · 6년 상한 ${fDate(lim)}, 더 늘릴 수 없음`,
         why: '마지막 대면 확인 후 6년이 다 돼 갱신할 수 없어요' }; }],
   ]);
   useNonce(req.nonce); const ok = !R.failed; let newCred = null;
@@ -738,12 +739,12 @@ async function hubRenew({ cred, spki, req, sig }) {
   D.push(['얼굴 (시뮬레이션)', `촬영본 ↔ ${PHOTOS[pkey(p)] || '-'}`]);
   if (newCred) { D.push(['새 신분증', `${newCred.payload.id} · 같은 폰 열쇠`]); D.push(['새 만료일', expNote(newCred.payload)]); D.push(vrow('새 신분증 서명', newCred.sig, await verifyObj(H.issuer.spki, newCred.payload, newCred.sig))); }
   hubLog({ kind: 'renew', ok, badge: '갱신', title: '갱신 요청', checks: R.checks,
-    result: ok ? `새 유효기간 ${fDate(Date.parse(newCred.payload.expiresAt))}까지 발급(${isCapped(newCred.payload) ? '대면확인+6년으로 맞춤' : '받은 날+3년'}) · 지금 신분증은 폐기 목록으로` : `거절 — ${R.failed.n}: ${R.failed.note}`,
+    result: ok ? `새 유효기간 ${fDate(Date.parse(newCred.payload.expiresAt))}까지 발급(${isCapped(newCred.payload) ? '대면확인+6년으로 맞춤' : '받은 날+3년'}) · 지금 신분증은 폐기 목록으로` : `거절 · ${R.failed.n}: ${R.failed.note}`,
     details: D, data: { cred, phoneSpki: spki, request: req, signature: sig, newCred } });
   return { ok, failed: R.failed, why: why(R.failed), visit: !!R.failed && VISIT.includes(R.failed.n), six: !!R.failed && R.failed.n === '6년 상한', newCred };
 }
 
-// 시간이 지나 생기는 일: 되돌리기 열쇠 만료(72시간), 만료 60일 전 알림, 만료 — 일어난 그 시각으로 기록
+// 시간이 지나 생기는 일: 되돌리기 열쇠 만료(72시간), 만료 60일 전 알림, 만료. 일어난 그 시각으로 기록
 function hubTick() {
   const ev = [];
   for (const [id, u] of H.undoKeys) { const t = Date.parse(u.payload.expiresAt); if (!u.used && !u.expired && t <= S.now) ev.push({ t, k: 'undo', id, u }); }
@@ -759,15 +760,15 @@ function hubTick() {
     if (e.k === 'undo') {
       e.u.expired = true;
       hubLog({ kind: 'expire', ok: true, badge: '끝', title: '72시간 지남', result: '되돌리기 열쇠 만료 · 이제 되돌릴 수 없음 · 새 폰 보호 끝',
-        details: [['만료된 되돌리기 열쇠', `${e.id} (옛 폰)`], ['새 신분증', `${e.u.payload.newCredId} — 이제 개통·계좌 개설·재발급도 가능`]] }, e.t);
+        details: [['만료된 되돌리기 열쇠', `${e.id} (옛 폰)`], ['새 신분증', `${e.u.payload.newCredId}: 이제 개통·계좌 개설·재발급도 가능`]] }, e.t);
       const holder = [S.old, S.nw].find(d => d && d.undoKey && d.undoKey.payload.id === e.id);
       if (holder) { holder.undoKey = null; holder.screen = 'deleted'; holder.sheet = false; holder.toast = null; }
     } else if (e.k === 'notice') {
       H.notified.add(e.id);
-      hubLog({ kind: 'notice', ok: null, title: '만료 60일 전 알림', result: `앱 알림 발송 — ${Math.ceil((e.exp - e.t) / DAY)}일 남음 (${fDate(e.exp)} 만료)` }, e.t);
+      hubLog({ kind: 'notice', ok: null, title: '만료 60일 전 알림', result: `앱 알림 발송: ${Math.ceil((e.exp - e.t) / DAY)}일 남음 (${fDate(e.exp)} 만료)` }, e.t);
     } else {
       H.expired.add(e.id);
-      hubLog({ kind: 'notice', ok: null, title: '유효기간 만료', result: `${e.id} — ${fDate(e.exp)} 만료${isCapped(e.p) ? ' (대면 확인 6년 상한) · 방문해 IC 주민등록증으로 바꾸기 안내' : ''}` }, e.t);
+      hubLog({ kind: 'notice', ok: null, title: '유효기간 만료', result: `${e.id}: ${fDate(e.exp)} 만료${isCapped(e.p) ? ' (대면 확인 6년 상한) · 방문해 IC 주민등록증으로 바꾸기 안내' : ''}` }, e.t);
     }
   }
   for (const d of [S.old, S.nw]) {
@@ -798,7 +799,7 @@ async function setup(n) {
   const who = `김민수(1958년생)`;
   if (n === 1 || n === 2 || n === 3 || n === 8) {
     await issueTo(S.old, FIRST, FIRST, 0);
-    slog(`${who} — 2025. 4. 14. 주민센터에서 QR로 발급(대면 확인)`);
+    slog(`${who}: 2025. 4. 14. 주민센터에서 QR로 발급(대면 확인)`);
     if (n === 2) { S.labels[0].desc = '쓰던 폰 (명의자)'; S.labels[1].desc = '다른 사람이 내 명의로 개통한 폰'; }
     if (n === 3) {
       S.old.lost = true; Object.assign(H.creds.get(S.old.cred.payload.id), { status: 'suspended', reason: '분실 신고' });
@@ -815,12 +816,12 @@ async function setup(n) {
     revoke(aId, '새 폰으로 옮겨짐');
     H.transfers.push({ at: tt, person: pkey(P), from: aId, to: bId, reverted: false });
     S.old = B;
-    slog(`${who} — 2025. 4. 14. 주민센터 발급 → 2026. 9. 28. 지금의 옛 폰으로 이어받음(10일 전)`);
+    slog(`${who}: 2025. 4. 14. 주민센터 발급 → 2026. 9. 28. 지금의 옛 폰으로 이어받음(10일 전)`);
     S.labels = [{ tag: '옛 폰', desc: '10일 전에 이어받은 폰' }, { tag: '새 폰', desc: '또 바꾼 폰' }];
   } else if (n === 5) {
     const tt = T(2030, 9, 3, 15, 10); await issueTo(S.old, tt, FIRST, 1);
     H.transfers.push({ at: tt, person: pkey(P), from: 'MID-이전', to: S.old.cred.payload.id, reverted: false });
-    slog(`${who} — 2025. 4. 14. 주민센터 발급(마지막 대면 확인)`);
+    slog(`${who}: 2025. 4. 14. 주민센터 발급(마지막 대면 확인)`);
     slog('2028. 2. 갱신 → 2030. 9. 3. 지금의 옛 폰으로 이어받음 · 만료일은 대면 확인+6년인 2031. 4. 14.로 맞춰짐');
   } else if (n === 6) {
     const oId = await issueTo(S.old, FIRST, FIRST, 0);
@@ -831,12 +832,12 @@ async function setup(n) {
     S.old.cred = null;
     H.transfers.push({ at: tt, person: pkey(P), from: oId, to: nId, reverted: false });
     S.nw.screen = 'home';
-    slog(`${who} — 2025. 4. 14. 주민센터 발급`);
+    slog(`${who}: 2025. 4. 14. 주민센터 발급`);
     slog('오늘 08:00 모르는 폰으로 이어받기가 됨(주인은 모르는 일) · 옛 폰 신분증 폐기, 되돌리기 열쇠 발급 · 두 번호로 문자 알림');
     S.labels[1].desc = '내가 모르는 폰';
   } else if (n === 7) {
     await issueTo(S.old, FIRST, FIRST, 0); S.nw.unused = true;
-    slog(`${who} — 2025. 4. 14. 주민센터 발급(유효기간 3년)`);
+    slog(`${who}: 2025. 4. 14. 주민센터 발급(유효기간 3년)`);
     S.labels = [{ tag: '내 폰', desc: '쓰던 폰' }, { tag: '새 폰', desc: '이 시나리오에선 안 씀' }];
   }
   hubTick();
@@ -893,7 +894,7 @@ async function present(d, purpose) {
   const req = { type: '제출', purpose, credId: d.cred.payload.id, nonce, at: iso(S.now) };
   const sig = await signObj(d.keys.priv, req);
   const res = await hubPresent({ cred: d.cred, spki: d.keys.spki, req, sig });
-  d.toast = { ok: res.ok, text: res.ok ? `${purpose} — 확인됐어요` : `${purpose} — ${res.why}` };
+  d.toast = { ok: res.ok, text: res.ok ? `${purpose}: 확인됐어요` : `${purpose}: ${res.why}` };
 }
 async function undoSend(d) {
   d.screen = 'sending'; render(); await wait(500); bump(1);
@@ -910,7 +911,7 @@ async function renewSend(d) {
   const req = { type: '갱신 요청', credId: d.cred.payload.id, nonce, face: d.flow.face === 'self' ? P.photo : X.photo, at: iso(S.now) };
   const sig = await signObj(d.keys.priv, req);
   const res = await hubRenew({ cred: d.cred, spki: d.keys.spki, req, sig });
-  if (res.ok) { d.cred = res.newCred; d.notice = null; d.screen = 'home'; d.toast = { ok: true, text: `갱신됐어요 — ${fDate(Date.parse(res.newCred.payload.expiresAt))}까지` }; hubTick(); }
+  if (res.ok) { d.cred = res.newCred; d.notice = null; d.screen = 'home'; d.toast = { ok: true, text: `갱신됐어요. 새 유효기간 ${fDate(Date.parse(res.newCred.payload.expiresAt))}까지` }; hubTick(); }
   else { d.screen = 'rejected'; d.reject = { ...res, what: 'renew' }; if (res.six) d.capBlocked = true; }
 }
 async function fillPin(d) { for (let i = d.pin + 1; i <= 6; i++) { d.pin = i; render(); await wait(70); } }
@@ -918,12 +919,12 @@ async function replay() {
   const m = $('#hmsg');
   if (!S.lastPacket) { m.textContent = '먼저 이어받기 승인을 한 번 보내 보세요.'; return; }
   bump(1); const r = await hubTransfer(S.lastPacket, '방금 보낸 승인 꾸러미를 그대로 다시 보냄');
-  m.textContent = r.ok ? '통과했습니다.' : `공통기반이 거절했습니다 — ${r.failed.n}`;
+  m.textContent = r.ok ? '통과했습니다.' : `공통기반이 거절했습니다(${r.failed.n})`;
 }
 const counterReady = () => !!H && [...H.undoKeys.values()].some(u => !u.used && !u.expired);
 async function counterUndo(ok) {
   bump(1); const r = await hubCounterUndo(ok);
-  $('#cmsg').textContent = r.ok ? '되돌렸습니다. 새 폰 신분증은 폐기됐습니다.' : `거절됐습니다 — ${r.failed.n}`;
+  $('#cmsg').textContent = r.ok ? '되돌렸습니다. 새 폰 신분증은 폐기됐습니다.' : `거절됐습니다(${r.failed.n})`;
 }
 
 /* ───────── 행동 처리 ───────── */
@@ -969,7 +970,7 @@ async function handle(who, a) {
     case 'restart': resetNew(d); break;
     case 'give-start':
       if (S.nw.unused) { setHint('이 시나리오에서는 새 폰을 쓰지 않아요'); return 'blocked'; }
-      if (S.nw.screen !== 'qr') { setHint('새 폰에서 먼저 시작해요 — 새 폰의 「옛 폰에서 이어받기」부터 눌러 주세요'); return 'blocked'; }
+      if (S.nw.screen !== 'qr') { setHint('새 폰에서 먼저 시작해요. 새 폰의 「옛 폰에서 이어받기」부터 눌러 주세요'); return 'blocked'; }
       d.screen = 'pin'; d.pin = 0; break;
     case 'pin-digit': d.pin = Math.min(6, d.pin + 1); if (d.pin === 6) { render(); await wait(150); d.screen = 'scan'; } break;
     case 'pin-ok': await fillPin(d); await wait(120); d.screen = 'scan'; break;
@@ -1150,7 +1151,7 @@ function renderPhone(d, id) {
     const key = [d.screen, d.cred ? d.cred.payload.id : '', d.cred && H.creds.get(d.cred.payload.id) ? H.creds.get(d.cred.payload.id).status : '', d.undoKey ? d.undoKey.payload.id : ''].join('|');
     const enter = key !== d._k; d._k = key;
     el.innerHTML = `<div class="sbar"><span>${fHM(S.now)}</span>${IC.bars}</div>
-      <div class="demo">시연용 가상 화면 — 실제 모바일 신분증 앱이 아님</div>
+      <div class="demo">시연용 가상 화면(실제 모바일 신분증 앱이 아님)</div>
       <div class="abar"><span class="alogo">ID</span><b>내 신분증</b></div>
       <div class="body${enter ? ' enter' : ''}">${screenHTML(d)}</div>
       ${d.sheet ? sheetHTML() : ''}
@@ -1222,28 +1223,28 @@ function fit() {
 addEventListener('resize', fit);
 
 /* ───────── 자동 시연(직접 누를 때 주황 테두리도 이 순서를 따름) ───────── */
-const NEW3 = [['nw', 'start-transfer', '새 폰 — 옛 폰에서 이어받기'], ['nw', 'owner-self', '새 폰 — 본인 명의 확인'], ['nw', 'face-self', '새 폰 — 얼굴 인증, 공통기반이 바로 대조']];
-const OLD4 = [['old', 'give-start', '옛 폰 — 새 폰으로 이어주기'], ['old', 'pin-ok', '옛 폰 — 지문으로 확인'],
-  ['old', 'scan', '옛 폰 — 새 폰 QR 촬영, 블루투스로 근거리 확인'], ['old', 'approve', '옛 폰 — 확인 내용과 경고문을 보고 승인', 1600]];
+const NEW3 = [['nw', 'start-transfer', '새 폰: 옛 폰에서 이어받기'], ['nw', 'owner-self', '새 폰: 본인 명의 확인'], ['nw', 'face-self', '새 폰: 얼굴 인증, 공통기반이 바로 대조']];
+const OLD4 = [['old', 'give-start', '옛 폰: 새 폰으로 이어주기'], ['old', 'pin-ok', '옛 폰: 지문으로 확인'],
+  ['old', 'scan', '옛 폰: 새 폰 QR 촬영, 블루투스로 근거리 확인'], ['old', 'approve', '옛 폰: 확인 내용과 경고문을 보고 승인', 1600]];
 const GIVE = [...NEW3, ...OLD4];
 const STEPS = {
   1: [...GIVE,
-    ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-tel', '새 폰 — 휴대폰 개통에 제출 (72시간 보호)'],
-    ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-gen', '새 폰 — 일반 신원확인에 제출'],
-    ['top', 't72', '72시간 뒤로'], ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-tel', '새 폰 — 휴대폰 개통에 제출']],
-  2: [NEW3[0], ['nw', 'owner-self', '새 폰 — 명의 확인(내 명의로 개통된 폰)'], ['nw', 'face-other', '새 폰 — 다른 사람 얼굴 → 공통기반이 바로 거절'],
-    ['old', 'report', '옛 폰 — 시도 알림을 보고 신고', 1200]],
-  3: [['nw', 'no-old', '새 폰 — 옛 폰이 없어요']],
-  4: [...GIVE, ['top', 't30', '30일 뒤로'], ['old', 'ok', '옛 폰 — 확인'], ['nw', 'restart', '새 폰 — 처음으로'], ...GIVE],
-  5: [...GIVE, ['top', 't72', '72시간 뒤로 — 그사이 만료 60일 전 알림'], ['nw', 'renew-start', '새 폰 — 갱신하기', 600],
-    ['nw', 'face-self', '새 폰 — 본인 얼굴로 인증'], ['nw', 'renew-send', '새 폰 — 지문으로 확인하고 갱신']],
-  6: [['old', 'undo-open', '옛 폰 — 내가 하지 않았어요', 600], ['old', 'undo-send', '옛 폰 — 지문으로 확인하고 되돌리기'],
-    ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-gen', '새 폰 — 일반 신원확인 시도'],
-    ['old', 'present-open', '옛 폰 — 제출하기'], ['old', 'present-gen', '옛 폰 — 일반 신원확인']],
-  7: [['old', 'renew-start', '내 폰 — 갱신하기', 600], ['old', 'face-self', '내 폰 — 본인 얼굴로 인증'], ['old', 'renew-send', '내 폰 — 지문으로 확인하고 갱신']],
-  8: [NEW3[0], ['nw', 'owner-self', '새 폰 — 명의 확인(내 명의로 개통된 폰)'], ['nw', 'face-self', '새 폰 — 얼굴 인증(통과했다고 가정)'],
-    ['old', 'give-start', '옛 폰 — 전화로 속은 피해자가 이어주기 시작'], ['old', 'pin-ok', '옛 폰 — 지문으로 확인'],
-    ['old', 'scan', '옛 폰 — 메신저로 받은 QR 캡처를 촬영, 근거리 확인 실패'], ['old', 'approve', '옛 폰 — 그래도 승인을 누름', 1600]],
+    ['nw', 'present-open', '새 폰: 제출하기'], ['nw', 'present-tel', '새 폰: 휴대폰 개통에 제출 (72시간 보호)'],
+    ['nw', 'present-open', '새 폰: 제출하기'], ['nw', 'present-gen', '새 폰: 일반 신원확인에 제출'],
+    ['top', 't72', '72시간 뒤로'], ['nw', 'present-open', '새 폰: 제출하기'], ['nw', 'present-tel', '새 폰: 휴대폰 개통에 제출']],
+  2: [NEW3[0], ['nw', 'owner-self', '새 폰: 명의 확인(내 명의로 개통된 폰)'], ['nw', 'face-other', '새 폰: 다른 사람 얼굴 → 공통기반이 바로 거절'],
+    ['old', 'report', '옛 폰: 시도 알림을 보고 신고', 1200]],
+  3: [['nw', 'no-old', '새 폰: 옛 폰이 없어요']],
+  4: [...GIVE, ['top', 't30', '30일 뒤로'], ['old', 'ok', '옛 폰: 확인'], ['nw', 'restart', '새 폰: 처음으로'], ...GIVE],
+  5: [...GIVE, ['top', 't72', '72시간 뒤로(그사이 만료 60일 전 알림)'], ['nw', 'renew-start', '새 폰: 갱신하기', 600],
+    ['nw', 'face-self', '새 폰: 본인 얼굴로 인증'], ['nw', 'renew-send', '새 폰: 지문으로 확인하고 갱신']],
+  6: [['old', 'undo-open', '옛 폰: 내가 하지 않았어요', 600], ['old', 'undo-send', '옛 폰: 지문으로 확인하고 되돌리기'],
+    ['nw', 'present-open', '새 폰: 제출하기'], ['nw', 'present-gen', '새 폰: 일반 신원확인 시도'],
+    ['old', 'present-open', '옛 폰: 제출하기'], ['old', 'present-gen', '옛 폰: 일반 신원확인']],
+  7: [['old', 'renew-start', '내 폰: 갱신하기', 600], ['old', 'face-self', '내 폰: 본인 얼굴로 인증'], ['old', 'renew-send', '내 폰: 지문으로 확인하고 갱신']],
+  8: [NEW3[0], ['nw', 'owner-self', '새 폰: 명의 확인(내 명의로 개통된 폰)'], ['nw', 'face-self', '새 폰: 얼굴 인증(통과했다고 가정)'],
+    ['old', 'give-start', '옛 폰: 전화로 속은 피해자가 이어주기 시작'], ['old', 'pin-ok', '옛 폰: 지문으로 확인'],
+    ['old', 'scan', '옛 폰: 메신저로 받은 QR 캡처를 촬영, 근거리 확인 실패'], ['old', 'approve', '옛 폰: 그래도 승인을 누름', 1600]],
 };
 function findAct(who, a) { const root = who === 'top' ? $('#top') : $('#' + who); return root.querySelector(`[data-act="${a}"]:not([disabled])`); }
 async function showTitle(n, t2, s2, ms) {
@@ -1255,7 +1256,7 @@ async function showTitle(n, t2, s2, ms) {
 async function autoplay(list, opt = {}) {
   if (S.auto) return; S.auto = { stop: false }; S.autoError = null; render();
   try {
-    if (list.length > 1) await showTitle(0, '신분증 이어받기 시뮬레이터', '폰 바꿔도 신분증은 그대로 — 옛 폰의 모바일신분증으로 새 폰에 다시 받기', 3200);
+    if (list.length > 1) await showTitle(0, '신분증 이어받기 시뮬레이터', '폰 바꿔도 신분증은 그대로: 옛 폰의 모바일신분증으로 새 폰에 다시 받기', 3200);
     for (const n of list) {
       if (S.auto.stop) break;
       S.caption = ''; await setup(n); render(); await showTitle(n);
@@ -1281,7 +1282,7 @@ async function autoplay(list, opt = {}) {
 /* ───────── 검증 기록 내보내기 ───────── */
 function exportLog() {
   const out = {
-    제목: '신분증 이어받기 시뮬레이터 — 공통기반 검증 기록',
+    제목: '신분증 이어받기 시뮬레이터: 공통기반 검증 기록',
     주의: '시연용 가상 데이터입니다(실제 인물·실제 신분증 아님). 얼굴 인증·명의 확인·근거리 확인·창구 본인 확인은 시뮬레이션이고 전자서명·검증은 실제(WebCrypto)입니다.',
     시나리오: SC[S.sc].t, 내보낸_실제시각: new Date().toISOString(), 가상시각: iso(S.now),
     서명방식: 'ECDSA P-256 + SHA-256 (WebCrypto). 서명값은 r||s 64바이트를 16진수로 적음. 서명 대상은 키를 사전순으로 정렬한 JSON 문자열(UTF-8). 공개키는 SPKI(DER)를 16진수로 적음.',

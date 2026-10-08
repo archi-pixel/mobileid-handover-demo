@@ -1,4 +1,4 @@
-// 신분증 이어받기 시뮬레이터 자동 검사 — Playwright + Chromium
+// 신분증 이어받기 시뮬레이터 자동 검사: Playwright + Chromium
 // 사용법: node run_tests.js   (결과는 같은 폴더 결과.txt 에 저장)
 'use strict';
 const path = require('path');
@@ -26,8 +26,8 @@ const log = s => { lines.push(s); console.log(s); };
 let pass = 0, fail = 0;
 const failures = [];
 function ok(name, cond, extra) {
-  if (cond) { pass++; log(`  [통과] ${name}${extra ? ' — ' + extra : ''}`); }
-  else { fail++; failures.push(name); log(`  [실패] ${name}${extra ? ' — ' + extra : ''}`); }
+  if (cond) { pass++; log(`  [통과] ${name}${extra ? ' (' + extra + ')' : ''}`); }
+  else { fail++; failures.push(name); log(`  [실패] ${name}${extra ? ' (' + extra + ')' : ''}`); }
 }
 const consoleErrors = [];
 function watch(page, tag) {
@@ -61,7 +61,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
 (async () => {
   const t0 = Date.now();
   const browser = await pw.chromium.launch();
-  log('신분증 이어받기 시뮬레이터 — 자동 검사 결과');
+  log('신분증 이어받기 시뮬레이터: 자동 검사 결과');
   log(`검사 시각: ${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })} (한국 시간)`);
   log(`브라우저: Chromium ${browser.version()} (Playwright, 화면 없이 실행)`);
   log(`검사 파일: index.html (${fs.statSync(HTML).size.toLocaleString()} 바이트)`);
@@ -109,8 +109,8 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
   const page = await open(ctx, FILE_URL + '?fast=1', '시나리오');
   const expect = {
     1: s => { const pre = byKind(s, 'prepare'), tr = byKind(s, 'transfer'), pr = byKind(s, 'present'), ex = byKind(s, 'expire');
-      ok('① 얼굴 먼저 — 새 폰 얼굴을 공통기반이 바로 대조해 통과한 뒤에 QR 발급', pre.length === 1 && pre[0].ok === true && pre[0].checks[0][0] === '얼굴 일치(공통기반 대조)' && pre[0].id < tr[0].id);
-      ok('① 이어받기 요청 — 다섯 가지 확인(세부 검사 11개) 모두 통과', tr.length === 1 && tr[0].ok === true && allPassed(tr[0]) && groupsOk(tr[0]));
+      ok('① 얼굴 먼저: 새 폰 얼굴을 공통기반이 바로 대조해 통과한 뒤에 QR 발급', pre.length === 1 && pre[0].ok === true && pre[0].checks[0][0] === '얼굴 일치(공통기반 대조)' && pre[0].id < tr[0].id);
+      ok('① 이어받기 요청: 다섯 가지 확인(세부 검사 11개) 모두 통과', tr.length === 1 && tr[0].ok === true && allPassed(tr[0]) && groupsOk(tr[0]));
       ok('① 새 신분증이 새 폰 열쇠에 묶임, 이어받기 1회차, 만료일 2029. 10. 8.(받은 날+3년)', s.nw.cred && s.nw.cred.holderKeyFp === s.nw.cred.keyFp && s.nw.cred.transferCount === 1 && s.nw.cred.expiresAt.startsWith('2029-10-08'));
       ok('① 72시간 안 휴대폰 개통 → 거절(72시간 보호), 일반 신원확인 → 통과', pr[0] && pr[0].ok === false && failedOf(pr[0]) === '72시간 보호' && pr[1] && pr[1].ok === true);
       ok('① 되돌리기 열쇠는 정확히 72시간 되는 시각(10. 11. 10:02)에 만료, 옛 폰엔 아무것도 안 남음', ex.length === 1 && ex[0].at.startsWith('2026-10-11T10:02') && s.old.screen === 'deleted' && !s.old.cred && !s.old.undoKey);
@@ -120,7 +120,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
       ok('② QR이 뜨지 않음(1회용 번호 발급 0건, 이어받기 요청 0건)', s.transferNonces === 0 && byKind(s, 'transfer').length === 0 && s.nw.screen === 'fail' && !s.nw.cred);
       ok('② 옛 폰(명의자)에 알림 → 신고 접수, 옛 폰 신분증은 그대로', pre.result.includes('명의자 폰에 알림') && byKind(s, 'report').length === 1 && s.old.cred.status === 'active' && !s.old.alert); },
     3: async s => { const txt = await page.textContent('#nw');
-      ok('③ 옛 폰 분실 — 옛 폰 칸 비활성, 분실 신고로 정지', s.old.lost && s.old.cred.status === 'suspended');
+      ok('③ 옛 폰 분실: 옛 폰 칸 비활성, 분실 신고로 정지', s.old.lost && s.old.cred.status === 'suspended');
       ok('③ 새 폰에 「주민센터 방문 / IC 주민등록증」 안내, 이어받기 요청 없음', s.nw.screen === 'nophone' && txt.includes('주민센터 방문') && txt.includes('IC 주민등록증') && byKind(s, 'transfer').length === 0); },
     4: s => { const tr = byKind(s, 'transfer');
       ok('④ 10일 전에 이어받은 신분증으로 또 시도 → 「30일 제한」에서 거절', tr[0] && tr[0].ok === false && failedOf(tr[0]) === '30일 제한');
@@ -138,7 +138,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
       await page.click('#top [data-act="t30"]'); await idle(page);
       const t2 = await page.textContent('#nw'); const s2 = await snap(page);
       const ex = s2.log.find(e => e.title === '유효기간 만료');
-      ok('⑤ 6년이 지나면 만료 — 「대면 확인 후 6년이 지났어요」와 방문 안내, 제출·이어주기 버튼 없음',
+      ok('⑤ 6년이 지나면 만료: 「대면 확인 후 6년이 지났어요」와 방문 안내, 제출·이어주기 버튼 없음',
         t2.includes('대면 확인 후 6년이 지났어요') && t2.includes('IC 주민등록증으로 바꾸기') && !(await page.isVisible('#nw [data-act="present-open"]')) && ex && ex.at.startsWith('2031-04-14T14:20'));
       const r = await page.evaluate(async () => { const d = S.nw; const nonce = rand(16); H.nonces.set(nonce, { kind: 'present', createdAt: S.now, used: false });
         const req = { type: '제출', purpose: '일반 신원확인', credId: d.cred.payload.id, nonce, at: iso(S.now) };
@@ -232,7 +232,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     const uk = await p.evaluate(async () => { const u = S.old.undoKey; return { bound: u.payload.holderKeyFp === S.old.keys.fp,
       hub: await verifyObj(H.hub.spki, u.payload, u.sig), issuer: await verifyObj(H.issuer.spki, u.payload, u.sig),
       hours: (Date.parse(u.payload.expiresAt) - Date.parse(u.payload.issuedAt)) / 36e5, oneTime: u.payload.oneTime }; });
-    ok('되돌리기 열쇠 — 공통기반 서명(발급기관 열쇠로는 검증 안 됨), 옛 폰 열쇠에 묶임, 72시간·1회용', uk.hub && !uk.issuer && uk.bound && uk.hours === 72 && uk.oneTime === true);
+    ok('되돌리기 열쇠: 공통기반 서명(발급기관 열쇠로는 검증 안 됨), 옛 폰 열쇠에 묶임, 72시간·1회용', uk.hub && !uk.issuer && uk.bound && uk.hours === 72 && uk.oneTime === true);
     const r = await p.evaluate(async () => {
       const e = H.log.filter(x => x.kind === 'transfer').pop(); const oldCred = e.data.cred; const d = S.old;
       const send = async (cred) => { const nonce = rand(16); H.nonces.set(nonce, { kind: 'present', createdAt: S.now, used: false });
@@ -276,7 +276,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
       render(); return { other, late, screen: S.old.screen, hasKey: !!S.old.undoKey };
     });
     ok('다른 폰 열쇠로 되돌리기 요청 → 「요청 서명」에서 거절', r3.other === '요청 서명');
-    ok('72시간 지나면 되돌리기 열쇠 만료 — 옛 폰 화면에서 사라지고, 예전 열쇠로 요청해도 「72시간 안」에서 거절', r3.late === '72시간 안' && r3.screen === 'deleted' && !r3.hasKey);
+    ok('72시간 지나면 되돌리기 열쇠 만료: 옛 폰 화면에서 사라지고, 예전 열쇠로 요청해도 「72시간 안」에서 거절', r3.late === '72시간 안' && r3.screen === 'deleted' && !r3.hasKey);
     await w.close();
 
     const c = await open(ctx, FILE_URL + '?fast=1&s=6', '분실 신고 창구');
@@ -357,7 +357,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     const j = JSON.parse(fs.readFileSync(f, 'utf8'));
     ok('JSON 파일로 내려받아짐(발급기관·공통기반 공개키 포함)', dl.suggestedFilename().endsWith('.json') && j['기록'].length > 0 && !!j['공통기반_공개키_SPKI'], dl.suggestedFilename());
     const r = V.check(j);
-    ok(`Node.js 내장 crypto로 서명 ${r.length}건 다시 검증 — 모두 맞음, 브라우저 판정과 모두 같음`, r.length >= 9 && r.every(x => x.결과 === true) && r.every(x => x.일치 !== false));
+    ok(`Node.js 내장 crypto로 서명 ${r.length}건 다시 검증: 모두 맞음, 브라우저 판정과 모두 같음`, r.length >= 9 && r.every(x => x.결과 === true) && r.every(x => x.일치 !== false));
     await p.close();
   }
   log('');
@@ -407,8 +407,8 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     ok('도움말·README에도 확정 시나리오 이름 8개', NAMES.every(n => html.includes(n) && readme.includes(n)));
     ok('시제품 이름 「신분증 이어받기 시뮬레이터」(페이지 제목·화면 위·README)', title === '신분증 이어받기 시뮬레이터' && brand === '신분증 이어받기 시뮬레이터' && readme.startsWith('﻿신분증 이어받기 시뮬레이터'));
     ok('README 첫머리에 확정 한 줄 요약', readme.includes('폰을 바꾸거나 3년이 지나도 다시 방문하지 않고, 옛 폰의 모바일신분증과 새 폰 얼굴 인증으로 신분증을 이어받습니다.'));
-    const banned = [new RegExp('잠금\\s*보관'), /약해지지 않/, /같은 수준/, /두 번 막/, /진짜 방어선/, new RegExp('갤럭시|아이폰|Galaxy|iPhone', 'i')];
-    ok('쓰지 않기로 한 표현(예전 72시간 표현, 보안 과장 표현, 실제 기종 이름)이 시제품·README에 없음', banned.every(b => !b.test(html) && !b.test(readme)));
+    const banned = [new RegExp('잠금\\s*보관'), /약해지지 않/, /같은 수준/, /두 번 막/, /진짜 방어선/, new RegExp('\uC9C4\uC9DC'), /\u2014/, new RegExp('갤럭시|아이폰|Galaxy|iPhone', 'i')];
+    ok('쓰지 않기로 한 표현(예전 72시간 표현, 보안 과장 표현, 긴 줄표, 실제 기종 이름)이 시제품·README에 없음', banned.every(b => !b.test(html) && !b.test(readme)));
     ok('승인 화면 코드에 「얼굴 인증: 완료」 표시가 없음', !/<dt>얼굴 인증<\/dt><dd class="y">완료/.test(html));
   }
   log('');
@@ -423,7 +423,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
   log('■ 요약');
   log(`  시나리오: ${summary.join(' · ')}  (${summary.filter(x => x.endsWith('맞음')).length}/8)`);
   log(`  8개 시나리오를 도는 동안 신분증으로 쓸 수 있었던 것의 최대 개수: ${maxActiveAll}개`);
-  log(`  전체 검사 ${pass + fail}개 중 통과 ${pass}개, 실패 ${fail}개${fail ? ' — ' + failures.join(', ') : ''}`);
+  log(`  전체 검사 ${pass + fail}개 중 통과 ${pass}개, 실패 ${fail}개${fail ? ' (' + failures.join(', ') + ')' : ''}`);
   log(`  걸린 시간 ${((Date.now() - t0) / 1000).toFixed(1)}초`);
   log('');
   log('※ 얼굴 인증·본인 명의 확인·블루투스 근거리 확인·창구 본인 확인은 시뮬레이션이고, 전자서명·검증은 브라우저 내장 WebCrypto로 실제 수행합니다.');

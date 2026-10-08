@@ -61,7 +61,7 @@ if (require.main === module) {
   let mismatch = 0;
   for (const x of r) {
     if (x.일치 === false) mismatch++;
-    console.log(`#${x.번호} ${x.제목} | ${x.항목}: ${x.결과 ? '맞음' : '틀림'}` + (x.브라우저판정 ? ` (브라우저 판정: ${x.브라우저판정}${x.일치 === false ? ' — 다름!' : ''})` : ''));
+    console.log(`#${x.번호} ${x.제목} | ${x.항목}: ${x.결과 ? '맞음' : '틀림'}` + (x.브라우저판정 ? ` (브라우저 판정: ${x.브라우저판정}${x.일치 === false ? ', 다름!' : ''})` : ''));
   }
   console.log(`서명 ${r.length}건 다시 검증 · 브라우저 판정과 다른 것 ${mismatch}건`);
   process.exit(mismatch ? 2 : 0);

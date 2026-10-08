@@ -1,14 +1,14 @@
 {
-  "제목": "신분증 이어받기 시뮬레이터 — 공통기반 검증 기록",
+  "제목": "신분증 이어받기 시뮬레이터: 공통기반 검증 기록",
   "주의": "시연용 가상 데이터입니다(실제 인물·실제 신분증 아님). 얼굴 인증·명의 확인·근거리 확인·창구 본인 확인은 시뮬레이션이고 전자서명·검증은 실제(WebCrypto)입니다.",
   "시나리오": "① 정상 이어받기",
-  "내보낸_실제시각": "2026-10-08T10:03:23.380Z",
+  "내보낸_실제시각": "2026-10-08T10:52:06.263Z",
   "가상시각": "2026-10-08T10:02:00+09:00",
   "서명방식": "ECDSA P-256 + SHA-256 (WebCrypto). 서명값은 r||s 64바이트를 16진수로 적음. 서명 대상은 키를 사전순으로 정렬한 JSON 문자열(UTF-8). 공개키는 SPKI(DER)를 16진수로 적음.",
-  "발급기관_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d030107034200042f11bdd08f93bdf3e5d4df0e7121449f0549759dbd751a6ff347ce325f0b0d10e11d05d3586b103ab3a502ebf10393aaee74e9557c1670e16201d339e4062757",
-  "발급기관_공개키_지문_SHA256": "fbf8b12a8c48ae7da038811d79ca19d442edce07a533a56e921710c5304e629b",
-  "공통기반_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d03010703420004f143f7f0aa28370f9f64ab3f2b5e193ad348f1e6f5995dc66d85af8cedff10c5faa5c59b3d2a7537a00e98126fe86925793fa80d9ea664742e99f5d1061aa88d",
-  "공통기반_공개키_지문_SHA256": "c848d0583eb551f1f4da812d2ffe66e4910bdc87c32e264def5426db1b8a015f",
+  "발급기관_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d03010703420004f3427d0c12cc5855ad798da4b6d973e2786287a4d7b60b46b9db66dac36447ef9043d1f1e042f5adb7a30c7142b6e787b8ab7839313e56aa622b3b3ad1338911",
+  "발급기관_공개키_지문_SHA256": "bd45fa89e18254cb263d0bf5ae211747f3271c64ad76fa8538a95aab8e225c04",
+  "공통기반_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d03010703420004eb29288b275906bc338c4e3e68b7efea1f987b6467f093cac96488192071bff8ea0d39b4659b5a6f250511d9b90dab40eaea26e482e21aa16cf21578f59e78fd",
+  "공통기반_공개키_지문_SHA256": "461542e87e424705abe206930eea2a3a815e8564fb0944ea96e8ecdbc67c11dc",
   "기록": [
     {
       "번호": 1,
@@ -16,7 +16,7 @@
       "종류": "setup",
       "제목": "준비",
       "판정": "-",
-      "내용": "김민수(1958년생) — 2025. 4. 14. 주민센터에서 QR로 발급(대면 확인)",
+      "내용": "김민수(1958년생): 2025. 4. 14. 주민센터에서 QR로 발급(대면 확인)",
       "검사": [],
       "원자료": null
     },
@@ -37,9 +37,9 @@
         }
       ],
       "원자료": {
-        "newPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d03010703420004a7aaac369c2d8dda325bbe587d9e7cd43ac44965f541f396b48132e846e880a02d2982abef9e4fbdc847c83c598633709988626f2ff861fcae3ec78726d5afc1",
-        "newPhoneKeyFp": "b79f3a128c02b551673d6532c82e04f871e98a4df63079a2a7f0cfa3a977925d",
-        "nonce": "303327185ead5b7c8f2f05bf5324420e"
+        "newPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d03010703420004aa61fe34f254878d2ac1251bbf15fe89b1205feef502a54a0bb45cd147185d863faff4178acb8b5b61a77f4831fb20bffbc1a77b85ea657ad7eb29e2011a9692",
+        "newPhoneKeyFp": "d2ad2a63a4962350f9a61c1af4bab820204628ef6c10218773ae1d3368c398f2",
+        "nonce": "84d50bf238fbc32248c452dd5d6425e3"
       }
     },
     {
@@ -48,7 +48,7 @@
       "종류": "transfer",
       "제목": "이어받기 요청",
       "판정": "거절",
-      "내용": "거절 — 승인 서명: 서명이 내용과 안 맞음 · 옛 번호로 문자 알림",
+      "내용": "거절 · 승인 서명: 서명이 내용과 안 맞음 · 옛 번호로 문자 알림",
       "검사": [
         {
           "항목": "옛 신분증 서명",
@@ -131,30 +131,30 @@
       "원자료": {
         "cred": {
           "payload": {
-            "id": "MID-8E474A",
+            "id": "MID-A51D06",
             "type": "주민등록증",
             "name": "김민수",
             "birth": "1958-03-14",
-            "holderKeyFp": "a87800c3aacc300c68cd99d57e6d9eee5571d0028f5fa8a72c82058b9ae2853b",
+            "holderKeyFp": "8b10e3629af7a780cce8b00ebc4112f30587424690ac262ce8df4a7a6d0faaf1",
             "issuedAt": "2025-04-14T14:20:00+09:00",
             "expiresAt": "2028-04-14T14:20:00+09:00",
             "lastInPersonAt": "2025-04-14T14:20:00+09:00",
             "transferCount": 0,
             "issuer": "가상 발급기관(시연용)"
           },
-          "sig": "d39ac7c1d7e82587578a3298384868e8b4f2eddde7331f8c73e438286fb4adbc2fb0ccc94d8d3119279941f4eeeaedccae8a1bed700c6cdbd30a69bfcb7557a9"
+          "sig": "b39a7f1630b962c68aa706e4c17289b847462a6dff925701522f8751aca0299b070f591297be0a67cbe19b3186140a03ca6ddf82b3705def28d4dda9bf5fd2c8"
         },
-        "oldPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d03010703420004288b5264f321f498cb4e9adff50fd686bfb9a94217d96c4f03dce12cc5c3892f8b54440599b748723f4b4eadbb5c08c1087c2cb6555004ddd0d66f14fad4b9f1",
+        "oldPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d030107034200045a781d88aa0af65eb13632c7d3fed21f1a41e77b7aae88a5ed7ca8c54f46b56386ea378a73c505d07e9ea28727cf7b61c6ac27742ed29f8686845d4b33659f5b",
         "approval": {
           "type": "이어받기 승인",
-          "credId": "MID-8E474A",
-          "newKeyFp": "b79f3a128c02b551673d6532c82e04f871e98a4df63079a2a7f0cfa3a977925d",
-          "nonce": "303327185ead5b7c8f2f05bf5324420e",
-          "nearToken": "7ba74f30a8978122",
+          "credId": "MID-A51D06",
+          "newKeyFp": "d2ad2a63a4962350f9a61c1af4bab820204628ef6c10218773ae1d3368c398f2",
+          "nonce": "84d50bf238fbc32248c452dd5d6425e3",
+          "nearToken": "a5fcda620d7bfad9",
           "requestedAt": "2026-10-08T10:01:00+09:00",
           "approvedAt": "2026-10-08T10:02:00+09:00"
         },
-        "approvalSig": "221e2e7694ae129c8d7effcf0e2019c465592a471c8cf5464851b9114be3f41b3d9de312f4aa1899f2877f6262b5426110c90a791408ce4a18944f91b5e50cf5",
+        "approvalSig": "56b938359394525164788dc6b4240bc64538a111190f91be6a71fbf4ccad2f21dd9b80a2f6dc3134df42b9724163e61e443ca5cc39288c0a51edb5944a753c46",
         "newCred": null,
         "undoKey": null,
         "tamper": "승인 서명 10번째 바이트를 바꿔 보냄"
