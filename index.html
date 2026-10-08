@@ -1,0 +1,1340 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>신분증 이어받기 시뮬레이터</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --bg:#e8ecf1; --panel:#fff; --ink:#1c222a; --ink2:#4a5562; --muted:#8a94a2; --line:#dbe1e8;
+  --brand:#0e6b66; --brand2:#e2f1ef; --ok:#18794a; --okbg:#e3f3e9; --bad:#c22a2a; --badbg:#fde8e7;
+  --warn:#8a5300; --warnbg:#fff2d3; --next:#f59e0b;
+  --font:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR","Noto Sans CJK KR",sans-serif;
+  --mono:ui-monospace,Consolas,"D2Coding","Cascadia Mono","Noto Sans Mono CJK KR",monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default}
+.mono{font-family:var(--mono);font-size:.94em;letter-spacing:-.1px}
+.dim{color:var(--muted)}
+.i{display:inline-block;vertical-align:-1px;flex:none}
+
+/* 위 막대 */
+#top{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:9px 16px;background:#fff;border-bottom:1px solid var(--line)}
+#narrow{display:none;flex-basis:100%;text-align:center;font-weight:700;color:#7a4b00;background:var(--warnbg);border-radius:8px;padding:6px}
+@media (max-width:899px){#narrow{display:block}}
+.brand{display:flex;align-items:center;gap:8px;margin-right:6px;white-space:nowrap}
+.brand b{font-size:15px}
+.bmark{width:26px;height:26px;border-radius:8px;background:var(--brand);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+.tb{height:34px;padding:0 12px;border:1px solid var(--line);background:#fff;border-radius:8px;white-space:nowrap}
+.tb:hover:not(:disabled){background:#f3f5f8}
+.tb.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.tb.pri:hover:not(:disabled){background:#333c47}
+.tb.sm{height:30px;font-size:13px;padding:0 10px}
+.tb:disabled{opacity:.45}
+select.tb{padding:0 8px;width:270px;text-overflow:ellipsis}
+.clock{height:34px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:#eef1f5;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:6px}
+.tj{display:flex;gap:4px}
+.grow{flex:1}
+.tchip{font-size:12px;font-weight:700;color:var(--bad);border:1px solid #f0b4b4;background:var(--badbg);border-radius:99px;padding:4px 10px;white-space:nowrap}
+
+/* 무대 */
+#view{position:fixed;left:0;right:0;bottom:0;overflow:hidden}
+#stage{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;padding:14px 22px 8px;height:850px}
+.cols{display:flex;gap:24px;height:776px;flex:none}
+.col{display:flex;flex-direction:column}
+.phonecol{width:360px;flex:none}
+.hubcol{flex:1;min-width:0}
+.clabel{height:28px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink2);white-space:nowrap}
+.clabel small{font-weight:500;color:var(--muted);font-size:12px}
+.ctag{background:#fff;border:1px solid var(--line);border-radius:99px;padding:2px 10px;color:var(--ink)}
+.strip{height:40px;margin-top:12px;display:flex;align-items:center;justify-content:center;flex:none}
+.spill{max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:16px;font-weight:700;border-radius:99px;padding:7px 20px}
+.spill.cap{background:var(--brand);color:#fff}
+.spill.hint{background:var(--warnbg);color:#7a4b00;border:1.5px solid #f0c674}
+
+/* 휴대폰 틀 */
+.phone{position:relative;width:360px;height:740px;border-radius:48px;background:#16191d;padding:10px;box-shadow:0 14px 34px rgba(18,28,40,.20),inset 0 0 0 2px #2c3138}
+.phone.off{opacity:.5}
+.scr{position:relative;width:100%;height:100%;border-radius:39px;background:#f4f6f8;overflow:hidden;display:flex;flex-direction:column}
+.scr::after{content:"";position:absolute;bottom:7px;left:50%;width:120px;height:4px;margin-left:-60px;border-radius:4px;background:#1c222a;opacity:.55;z-index:4}
+.sbar{position:relative;height:30px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:3px 28px 0;font-size:12.5px;font-weight:700;background:#fff}
+.sbar::before{content:"";position:absolute;top:9px;left:50%;width:11px;height:11px;margin-left:-5px;border-radius:50%;background:#0d0f12}
+.sbar svg{display:block}
+.demo{flex:none;font-size:10.5px;letter-spacing:-.2px;color:#6d5512;background:#fff4d6;text-align:center;padding:2px 0 3px}
+.abar{flex:none;height:46px;display:flex;align-items:center;gap:9px;padding:0 18px;background:#fff;border-bottom:1px solid #e9edf1;font-size:15.5px}
+.alogo{width:24px;height:24px;border-radius:7px;background:var(--brand);color:#fff;font-size:10.5px;font-weight:800;display:grid;place-items:center}
+.body{position:relative;flex:1;min-height:0;padding:16px 18px 26px;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.body.enter{animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.body h3{margin:4px 0 0;font-size:19px;line-height:1.35;letter-spacing:-.3px}
+.body p{margin:0;line-height:1.55;color:var(--ink2)}
+.stepno{font-size:12.5px;color:var(--brand);font-weight:700}
+.sim{display:inline-block;vertical-align:middle;margin-left:6px;font-size:11.5px;font-weight:700;color:#7a5600;background:var(--warnbg);border:1px dashed #d4a64a;border-radius:99px;padding:1px 8px}
+.sim.assume{color:#5a3d99;background:#efe9fb;border-color:#a98bdc}
+.acts{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.btn{height:50px;width:100%;border-radius:13px;border:1px solid #cdd5de;background:#fff;font-size:15.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.danger{border-color:#e6a4a4;color:var(--bad)}
+.btn.dangerfill{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn:disabled{opacity:.42}
+.btn svg{flex:none}
+.link{align-self:center;background:none;border:0;color:var(--ink2);font-size:14px;text-decoration:underline;text-underline-offset:3px;padding:6px 10px}
+.center{text-align:center}
+.pulse{outline:3px solid var(--next)!important;outline-offset:3px;animation:pulse .7s ease-in-out infinite alternate}
+@keyframes pulse{from{outline-color:var(--next)}to{outline-color:rgba(245,158,11,.3)}}
+.next{outline:3px solid var(--next);outline-offset:3px}
+
+/* 신분증 카드 */
+.idcard{position:relative;border-radius:16px;background:#fff;border:1px solid #e1e6ec;box-shadow:0 3px 12px rgba(16,40,60,.09);overflow:hidden;flex:none}
+.ctop{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:linear-gradient(118deg,#0e6b66,#1f8a7d);color:#fff;font-weight:800;font-size:15px}
+.cm{font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.55);border-radius:99px;padding:1px 8px}
+.cmid{display:flex;gap:14px;padding:16px 16px 12px}
+.cphoto{width:72px;height:90px;border-radius:8px;background:#edf0f3;overflow:hidden;flex:none}
+.cname{font-size:23px;font-weight:800;letter-spacing:2px}
+.crow{margin-top:5px;color:var(--ink2);font-size:13.5px}
+.cbot{display:flex;justify-content:space-between;padding:10px 16px;border-top:1px dashed #e1e6ec;font-size:13px;color:var(--ink2)}
+.cbot b{color:var(--ink)}
+.cchips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px}
+.cchips:empty{display:none}
+.chip{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;background:#edf2f6;color:#33506b;display:inline-flex;align-items:center;gap:4px}
+.chip.prot{background:var(--warnbg);color:#7a5200}
+.chip.cap{background:#e8edfb;color:#34489a}
+.idcard.off .ctop{background:#9aa3ad}
+.cov{position:absolute;inset:0;display:grid;place-items:center;background:rgba(244,246,248,.74);font-size:18px;font-weight:800;color:#36414d}
+.cov span{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #d5dbe2;border-radius:99px;padding:7px 16px}
+.cov.bad span{color:var(--bad);border-color:#efb1b1}
+
+.notice{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--warnbg);border:1px solid #efd18e;border-radius:14px;padding:11px 12px 11px 14px}
+.notice b{display:block;font-size:14.5px}
+.notice small{color:#7a5a12;line-height:1.4;display:block}
+.notice .btn{width:auto;height:38px;padding:0 14px;font-size:14px;border-radius:10px;flex:none}
+.notice.alert{background:#fff1f0;border-color:#efb1b1}
+.notice.alert b{color:var(--bad)}
+.notice.alert small{color:#8d3a3a}
+.infobox{border-radius:14px;background:#fff;border:1px solid #e1e6ec;padding:12px 14px;line-height:1.5}
+.infobox b{display:block;font-size:14.5px}
+.infobox span{color:var(--ink2);font-size:13.5px}
+.infobox.bad{border-color:#f0b6b6;background:#fff7f7}
+.infobox.bad b{color:var(--bad)}
+.toast{border-radius:12px;padding:10px 13px;font-size:14px;font-weight:700;line-height:1.45}
+.toast.ok{background:var(--okbg);color:var(--ok)}
+.toast.bad{background:var(--badbg);color:var(--bad)}
+.ukey{display:flex;align-items:center;gap:12px;border:1.5px dashed #9fb0c0;border-radius:14px;padding:11px 14px;background:#fff;color:#4a5562}
+.ukey b{display:block;font-size:14.5px;color:var(--ink)}
+.ukey small{font-size:12.5px}
+
+/* 빈 화면, 결과 */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;margin-top:70px;color:var(--ink2)}
+.empty.moved{margin-top:46px}
+.empty b{font-size:16.5px;color:var(--ink);line-height:1.45}
+.empty span{font-size:14px;color:var(--ink2)}
+.result{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;margin-top:18px}
+.ricon{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:30px;font-weight:800}
+.result.bad .ricon{background:var(--badbg);color:var(--bad)}
+.result .sub{font-size:13.5px;color:var(--ok);font-weight:700}
+.visit{border-radius:14px;background:#fff;border:1px solid #e1e6ec;padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.visit>b{font-size:14.5px}
+.vopt{display:flex;flex-direction:column;border-left:3px solid var(--brand);padding-left:10px}
+.vopt b{font-size:14px}
+.vopt span{font-size:13px;color:var(--ink2)}
+
+/* 단계 화면 */
+.illo{display:grid;place-items:center;margin:18px 0 6px}
+.facering{width:190px;height:190px;border-radius:50%;border:3px dashed var(--brand);display:grid;place-items:center;background:#fff;overflow:hidden}
+.qrbox{align-self:center;width:206px;height:206px;padding:8px;background:#fff;border-radius:14px;border:1px solid #e1e6ec}
+.qrbox svg{width:100%;height:100%;display:block}
+.codeline{align-self:center;font-size:11.5px;color:var(--ink2);background:#fff;border:1px solid #e6eaef;border-radius:8px;padding:5px 9px;text-align:center;line-height:1.5}
+.ticks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.ticks li{display:flex;align-items:center;gap:7px}
+.ticks li .i{color:var(--ok)}
+.spin{width:46px;height:46px;border-radius:50%;border:4px solid #d6e6e4;border-top-color:var(--brand);animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.radar{position:relative;width:170px;height:170px;display:grid;place-items:center}
+.radar i{position:absolute;inset:0;border-radius:50%;border:2px solid #9cc9c4;animation:ring 1.6s ease-out infinite}
+.radar i:nth-child(2){animation-delay:.55s}
+.radar.ok i,.radar.fail i{animation:none;opacity:.5}
+.radar.fail i{border-color:#e3a3a3}
+@keyframes ring{from{transform:scale(.35);opacity:1}to{transform:scale(1);opacity:0}}
+.radar svg{position:relative}
+.dots{display:flex;justify-content:center;gap:14px;margin:6px 0}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid #9aa6b2}
+.dots i.on{background:var(--ink);border-color:var(--ink)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.keypad button,.keypad span{height:48px;border:0;background:none;border-radius:12px;font-size:21px;font-weight:600}
+.keypad button:hover{background:#e9edf1}
+.keypad .kx{font-size:14px;color:var(--ink2)}
+.finder{position:relative;height:250px;border-radius:16px;background:#262b31;display:grid;place-items:center;overflow:hidden}
+.finder .ghost{width:150px;height:150px;opacity:.85;filter:blur(.4px)}
+.finder .ghost svg{width:100%;height:100%}
+.finder i{position:absolute;width:34px;height:34px;border:4px solid #fff}
+.finder .c1{top:30px;left:70px;border-right:0;border-bottom:0;border-radius:8px 0 0 0}
+.finder .c2{top:30px;right:70px;border-left:0;border-bottom:0;border-radius:0 8px 0 0}
+.finder .c3{bottom:30px;left:70px;border-right:0;border-top:0;border-radius:0 0 0 8px}
+.finder .c4{bottom:30px;right:70px;border-left:0;border-top:0;border-radius:0 0 8px 0}
+.finder em{color:#aab4bf;font-style:normal;font-size:13px}
+.kv{margin:0;display:grid;grid-template-columns:auto 1fr;border:1px solid #e1e6ec;border-radius:14px;background:#fff;overflow:hidden}
+.kv dt,.kv dd{margin:0;padding:10px 14px;border-bottom:1px solid #eef1f4;font-size:14px}
+.kv dt{color:var(--ink2);white-space:nowrap}
+.kv dd{font-weight:700;text-align:right}
+.kv dt:nth-last-of-type(1),.kv dd:nth-last-of-type(1){border-bottom:0}
+.kv .y{color:var(--ok)}
+.kv .n{color:var(--bad)}
+.warnbox{border-radius:14px;background:#fff1f0;border:1.5px solid #e9a3a0;color:#9c1d1d;padding:12px 14px;font-weight:800;font-size:15px;line-height:1.45;display:flex;gap:10px;align-items:flex-start}
+.warnbox svg{flex:none;margin-top:2px}
+
+/* 고르기 창 */
+.sheetbg{position:absolute;inset:0;background:rgba(20,26,34,.35);z-index:5}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:6;background:#fff;border-radius:22px 22px 0 0;padding:18px 18px 30px;display:flex;flex-direction:column;gap:8px;animation:up .22s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.sheet h4{margin:0 0 4px;font-size:16px}
+.opt{display:flex;justify-content:space-between;align-items:center;text-align:left;border:1px solid #dfe5eb;background:#fff;border-radius:12px;padding:12px 14px;font-size:15px;font-weight:700}
+.opt small{font-weight:500;color:var(--muted);font-size:12.5px}
+.opt.hi::after{content:"중요";font-size:11px;font-weight:700;color:#7a5200;background:var(--warnbg);border-radius:99px;padding:2px 8px}
+
+.lostov{position:absolute;inset:0;z-index:8;background:#2b3138;display:grid;place-items:center;color:#fff;text-align:center}
+.lostov b{display:block;font-size:22px;margin-bottom:6px}
+.lostov span{color:#c9d1da}
+.unused{flex:1;display:grid;place-items:center;color:var(--muted);text-align:center;padding:20px}
+
+/* 공통기반 */
+.hub{flex:1;min-height:0;background:#fff;border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;overflow:hidden}
+.hmeta{flex:none;display:flex;flex-wrap:wrap;gap:4px 18px;padding:9px 16px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink2)}
+.hmeta b{color:var(--ink)}
+.simk{display:inline-block;border:1px dashed #8a94a2;border-radius:4px;padding:0 5px}
+#log{list-style:none;margin:0;padding:6px 14px 18px;overflow:auto;flex:1}
+#log .day{font-size:12px;font-weight:700;color:var(--muted);padding:10px 2px 2px}
+.ent{border-left:4px solid #c9d1da;background:#f8fafb;border-radius:9px;padding:9px 12px;margin:6px 0}
+.ent.ok{border-left-color:var(--ok)}
+.ent.bad{border-left-color:var(--bad);background:#fff8f8}
+.ent.info{border-left-color:#7d8ea2}
+.ent.setup,.ent.time{background:none;border-left-color:transparent;padding:3px 12px;margin:2px 0;color:var(--muted);font-size:13px}
+.ent.clk{cursor:pointer}
+.ent.clk:hover{background:#f1f5f8}
+.ent.bad.clk:hover{background:#fff1f1}
+.ent.flash{animation:flash 1.4s ease}
+@keyframes flash{from{box-shadow:0 0 0 3px rgba(14,107,102,.35)}to{box-shadow:0 0 0 0 rgba(14,107,102,0)}}
+.eh{display:flex;align-items:baseline;gap:10px}
+.eh time{flex:none;min-width:42px;font-weight:700;color:var(--ink2);font-variant-numeric:tabular-nums}
+.eh b{font-size:14.5px}
+.ent.setup .eh b,.ent.time .eh b{flex:none;white-space:nowrap;font-size:13px;font-weight:600;color:var(--ink2)}
+.ent.setup .eh span,.ent.time .eh span{color:var(--muted)}
+.badge{margin-left:auto;flex:none;font-size:12px;font-weight:800;padding:2px 10px;border-radius:99px;background:#eef1f4;color:var(--ink2)}
+.badge.ok{background:var(--okbg);color:var(--ok)}
+.badge.bad{background:var(--badbg);color:var(--bad)}
+.checks{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0 0 52px}
+.ck{font-size:12.5px;padding:2px 8px;border-radius:6px;border:1px solid transparent;white-space:nowrap}
+.ck.y{background:var(--okbg);color:var(--ok)}
+.ck.n{background:var(--bad);color:#fff;font-weight:800}
+.ck.s{background:#f0f2f5;color:#a1aab4}
+.ck.sim{border-style:dashed;border-color:currentColor}
+.g5{margin:7px 0 0 52px}
+.g5h{font-size:12.5px;font-weight:700;color:var(--ink2);margin-bottom:4px}
+.g5h span{font-weight:500;color:var(--muted)}
+.g5b{display:flex;flex-wrap:wrap;gap:5px 14px}
+.grp{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.gn{font-size:12.5px;font-weight:800;color:var(--ink2);margin-right:2px;white-space:nowrap}
+.grp.n .gn{color:var(--bad)}
+.grp.s .gn{color:#a1aab4}
+.res{margin:6px 0 0 52px;font-size:13.5px;line-height:1.5}
+.ent.ok .res{color:var(--ok);font-weight:700}
+.ent.bad .res{color:var(--bad);font-weight:800}
+.more{margin:5px 0 0 52px;font-size:12px;color:#5d6d80}
+.det{margin:8px 0 2px 52px;width:calc(100% - 52px);border-collapse:collapse;font-size:12px;background:#fff;border:1px solid #e6eaef;border-radius:8px;cursor:auto}
+.det th{width:1%;white-space:nowrap;text-align:left;vertical-align:top;font-weight:600;color:var(--ink2);padding:5px 10px;border-bottom:1px solid #f0f2f5}
+.det td{vertical-align:top;padding:5px 10px 5px 0;border-bottom:1px solid #f0f2f5;word-break:break-all;line-height:1.45}
+.det td.r{width:1%;white-space:nowrap;text-align:right}
+.vy{color:var(--ok);font-weight:800}
+.vn{color:var(--bad);font-weight:800}
+
+/* 자동 시연 제목, 창 */
+#ovl{position:fixed;inset:0;z-index:20;display:none;place-items:center;background:rgba(14,19,26,.52)}
+#ovl.show{display:grid;animation:fade .3s ease}
+.ocard{max-width:min(980px,92vw);background:#fff;border-radius:20px;padding:30px 48px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.ocard h2{margin:0 0 10px;font-size:30px;letter-spacing:-.5px;line-height:1.35}
+.ocard p{margin:0;font-size:19px;color:var(--ink2)}
+.ocard p+p{margin-top:8px;font-size:16px}
+dialog{border:0;border-radius:18px;padding:0;width:min(780px,94vw);max-height:88vh;box-shadow:0 24px 70px rgba(0,0,0,.32);color:var(--ink)}
+dialog::backdrop{background:rgba(18,24,32,.45)}
+dialog#counter{width:min(520px,94vw)}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line)}
+.hd b{font-size:17px}
+.hbody{padding:4px 24px 22px;overflow:auto;max-height:calc(88vh - 62px);line-height:1.7;font-size:14px}
+.hbody h4{margin:18px 0 6px;font-size:15px}
+.hbody ul,.hbody ol{margin:0;padding-left:20px}
+.hbody li{margin:2px 0}
+.hbody .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.hnote{color:var(--muted);font-size:13px}
+#cmsg{font-weight:700}
+</style>
+</head>
+<body>
+<header id="top">
+  <div id="narrow">PC 화면에서 열어 주세요</div>
+  <div class="brand"><span class="bmark">ID</span><b>신분증 이어받기 시뮬레이터</b></div>
+  <select id="sc" class="tb" aria-label="시나리오">
+    <option value="1">① 정상 이어받기</option>
+    <option value="2">② 다른 사람이 내 명의로 시도 → 얼굴 불일치로 거절</option>
+    <option value="3">③ 옛 폰 분실 → 방문·IC 안내</option>
+    <option value="4">④ 30일 안에 또 이어받기 → 거절</option>
+    <option value="5">⑤ 대면 확인 6년 상한</option>
+    <option value="6">⑥ 72시간 안 「내가 하지 않았어요」</option>
+    <option value="7">⑦ 만료 60일 전 → 3년 갱신</option>
+    <option value="8">⑧ 멀리서 승인 시도 → 근거리 확인에서 거절(얼굴은 통과했다고 가정한 경우)</option>
+  </select>
+  <button class="tb" data-act="reset">처음부터</button>
+  <button class="tb pri" data-act="auto" id="autoBtn">자동 시연</button>
+  <div class="clock" id="clock"></div>
+  <div class="tj"><button class="tb" data-act="t72">+72시간</button><button class="tb" data-act="t30">+30일</button><button class="tb" data-act="t3y">+3년</button></div>
+  <div class="grow"></div>
+  <span class="tchip" id="tchip" hidden></span>
+  <button class="tb" data-act="help">도움말</button>
+</header>
+
+<div id="view"><div id="stage">
+  <div class="cols">
+    <section class="col phonecol"><div class="clabel" id="lab-old"></div><div class="phone" id="old" data-who="old"><div class="scr"></div></div></section>
+    <section class="col phonecol"><div class="clabel" id="lab-nw"></div><div class="phone" id="nw" data-who="nw"><div class="scr"></div></div></section>
+    <section class="col hubcol">
+      <div class="clabel"><span class="ctag">공통기반 기록</span><small>가상 중앙 시스템</small>
+        <button class="tb sm" data-act="counter-open" id="counterBtn" style="margin-left:auto">분실 신고 창구에서 되돌리기</button>
+        <button class="tb sm" data-act="export">검증 기록 내보내기</button></div>
+      <div class="hub"><div class="hmeta" id="hmeta"></div><ol id="log"></ol></div>
+    </section>
+  </div>
+  <div class="strip" id="strip"></div>
+</div></div>
+
+<div id="ovl"><div class="ocard"><h2 id="ovt"></h2><p id="ovs"></p><p id="ovs2"></p></div></div>
+
+<dialog id="counter">
+  <div class="hd"><b>분실 신고 창구에서 되돌리기</b><button class="tb sm" data-act="counter-close">닫기</button></div>
+  <div class="hbody">
+    <p>옛 폰이 없어도(보상판매 등) 이어받은 지 72시간 안이면 누리집·콜센터(1688-0990)·주민센터에서 본인 확인 뒤 되돌릴 수 있어요. 새 폰 신분증은 바로 폐기되고, 신분증은 방문하거나 IC 주민등록증으로 다시 받아요.</p>
+    <h4>본인 확인<span class="sim">시뮬레이션</span></h4>
+    <div class="row"><button class="tb pri" data-act="counter-ok">본인 확인됨</button><button class="tb" data-act="counter-no">본인 아님</button></div>
+    <p class="hnote" id="cmsg"></p>
+  </div>
+</dialog>
+
+<dialog id="help">
+  <div class="hd"><b>도움말</b><button class="tb sm" data-act="help-close">닫기</button></div>
+  <div class="hbody">
+    <h4>이 화면</h4>
+    <p>폰을 바꿀 때 옛 폰의 모바일신분증과 새 폰 얼굴 인증으로 새 폰에 신분증을 다시 받는 과정(신분증 이어받기)을 시험해 보는 시뮬레이터입니다. 실제 모바일 신분증 앱이 아니고 정부 시스템과도 연결되지 않습니다. 인물(김민수, 1958년생)과 날짜는 모두 가상입니다.</p>
+    <ul>
+      <li><b>옛 폰</b> — 지금 신분증이 들어 있는 폰(쓰던 폰)</li>
+      <li><b>새 폰</b> — 신분증을 받을 폰</li>
+      <li><b>공통기반 기록</b> — 모바일 신분증 중앙 시스템 역할. 무엇을 검사했는지 시간순으로 남깁니다. 줄을 누르면 실제 서명값(16진수 앞부분)과 검증 결과가 펼쳐집니다. 빨간 칸이 막힌 검사입니다.</li>
+    </ul>
+    <h4>쓰는 법</h4>
+    <ul>
+      <li>위에서 시나리오를 고르고, 주황 테두리가 생긴 버튼을 차례로 누릅니다. 이어받기는 새 폰에서 먼저 시작합니다.</li>
+      <li>「자동 시연」은 1.5초마다 한 단계씩 저절로 진행합니다(다시 누르면 멈춤). 「+72시간」「+30일」「+3년」은 가상 시계를 앞으로 돌립니다.</li>
+      <li>「분실 신고 창구에서 되돌리기」는 옛 폰이 없을 때 창구에서 되돌리는 경우입니다(이어받은 지 72시간 안일 때만 누를 수 있음).</li>
+    </ul>
+    <h4>시나리오</h4>
+    <ul>
+      <li>① 정상 이어받기</li>
+      <li>② 다른 사람이 내 명의로 시도 → 얼굴 불일치로 거절 — QR도 뜨지 않고, 옛 폰에 시도 알림</li>
+      <li>③ 옛 폰 분실 → 방문·IC 안내</li>
+      <li>④ 30일 안에 또 이어받기 → 거절 — 30일이 지나면 됨</li>
+      <li>⑤ 대면 확인 6년 상한 — 이어받아도 만료일은 대면 확인 후 6년까지, 그때가 되면 갱신 대신 방문(IC 주민등록증 전환 안내)</li>
+      <li>⑥ 72시간 안 「내가 하지 않았어요」 — 새 폰 신분증 폐기, 옛 폰에 다시 발급</li>
+      <li>⑦ 만료 60일 전 → 3년 갱신</li>
+      <li>⑧ 멀리서 승인 시도 → 근거리 확인에서 거절(얼굴은 통과했다고 가정한 경우) — QR 화면을 캡처해 보내 옛 폰으로 찍게 해도 두 폰이 떨어져 있어 막힘</li>
+    </ul>
+    <h4>공통기반이 하는 다섯 가지 확인 (이어받기 요청)</h4>
+    <ol>
+      <li>옛 신분증 확인 — 옛 신분증 서명, 유효기간, 정지·폐기 아님</li>
+      <li>옛 폰 승인 확인 — 승인 서명, 1회용 번호</li>
+      <li>본인 확인 — 얼굴 일치(공통기반 대조), 명의 일치</li>
+      <li>근거리 확인 — 두 폰 가까이(블루투스)</li>
+      <li>이용 규칙 — 72시간 보호, 30일 제한, 6년 상한</li>
+    </ol>
+    <p class="hnote">얼굴은 새 폰에서 찍자마자 공통기반이 먼저 대조하고, 맞을 때만 새 폰에 QR이 뜹니다.</p>
+    <h4>진짜로 도는 것과 흉내 낸 것</h4>
+    <ul>
+      <li><b>진짜</b>: 전자서명과 검증. 브라우저에 들어 있는 암호 기능(WebCrypto)으로 ECDSA P-256(지금 널리 쓰는 타원곡선 전자서명)과 SHA-256을 씁니다. 가상 발급기관·공통기반·옛 폰·새 폰이 각자 열쇠를 만들고, 폰 열쇠의 비밀 부분은 밖으로 꺼낼 수 없게 만듭니다.</li>
+      <li><b>시뮬레이션</b>: 얼굴 인증, 본인 명의 확인, 블루투스 근거리 확인, 창구 본인 확인. 버튼이나 시나리오 설정으로 결과를 정합니다. 공통기반 기록에서 점선 칸이 시뮬레이션 결과입니다. ⑧의 「가정」 표시는 얼굴 인증이 뚫렸다고 보고 진행한다는 뜻입니다.</li>
+      <li><b>QR</b>은 모양만 흉내 냈고 「QR 촬영」 버튼으로 연결합니다. 연결 코드에는 새 폰 공개키 지문(열쇠를 줄인 값)과 1회용 번호가 들어 있습니다.</li>
+    </ul>
+    <h4>규칙</h4>
+    <ul>
+      <li>신분증으로 쓸 수 있는 폰은 언제나 한 대. 이어받는 순간 옛 폰 신분증은 폐기 목록에 올라 효력이 멈춤</li>
+      <li>옛 폰에는 72시간 동안 「내가 하지 않았어요」만 누를 수 있는 되돌리기 열쇠(공통기반이 옛 폰 열쇠에 묶어 서명한 1회용 증표)만 남음. 옛 폰이 없으면 분실 신고 창구에서 되돌림</li>
+      <li>새 폰은 72시간 동안 휴대폰 개통·계좌 개설·신분증 재발급(이어받기 포함)이 막힘. 일반 신원확인은 됨</li>
+      <li>이어받기는 30일에 한 번. 만료 60일 전에 앱 알림</li>
+      <li>실물 신분증(창구 확인 또는 IC 카드 태그)으로 6년마다 다시 확인. 만료일은 「받은 날+3년」과 「마지막 대면 확인+6년」 중 이른 날</li>
+    </ul>
+    <h4>위조 시험</h4>
+    <p class="hnote">누른 뒤 이어받기를 해 보면 공통기반이 어느 검사에서 막는지 볼 수 있습니다.</p>
+    <div class="row">
+      <button class="tb" data-act="tamper-sig">다음 승인 서명 1바이트 바꾸기</button>
+      <button class="tb" data-act="tamper-cred">다음 승인 때 신분증 생년 고치기</button>
+      <button class="tb" data-act="replay">방금 보낸 승인 다시 보내기</button>
+    </div>
+    <p class="hnote" id="hmsg"></p>
+    <h4>검증 기록 내보내기</h4>
+    <p>공통기반 기록을 JSON 파일로 내려받습니다. 서명값·공개키·서명한 내용이 모두 들어 있어 브라우저 밖에서도 다시 검증할 수 있습니다.</p>
+    <h4>만든 방법</h4>
+    <p>생성형 AI(Anthropic Claude)로 코딩했습니다. 외부 라이브러리 없이 이 파일 하나로 동작하며 인터넷 연결이 필요 없습니다.</p>
+  </div>
+</dialog>
+
+<script>
+'use strict';
+/* ───────── 기본 도구 ───────── */
+const $ = (s, r = document) => r.querySelector(s);
+const MIN = 6e4, HOUR = 36e5, DAY = 864e5, KST = 9 * HOUR;
+const WD = '일월화수목금토';
+const pad = n => String(n).padStart(2, '0');
+const kd = t => new Date(t + KST);
+const T = (y, mo, d, h = 10, mi = 0) => Date.UTC(y, mo - 1, d, h, mi) - KST;
+function addY(t, n) { const d = kd(t); d.setUTCFullYear(d.getUTCFullYear() + n); return d.getTime() - KST; }
+const fDate = t => { const d = kd(t); return `${d.getUTCFullYear()}. ${d.getUTCMonth() + 1}. ${d.getUTCDate()}.`; };
+const fDay = t => `${fDate(t)}(${WD[kd(t).getUTCDay()]})`;
+const fHM = t => { const d = kd(t); return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`; };
+const fDT = t => `${fDay(t)} ${fHM(t)}`;
+const fShort = t => { const d = kd(t); return `${d.getUTCMonth() + 1}. ${d.getUTCDate()}. ${fHM(t)}`; };
+const iso = t => kd(t).toISOString().replace('.000Z', '+09:00');
+const mask = n => n.length >= 3 ? n[0] + '○' + n.slice(2) : n[0] + '○';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ───────── 암호 (WebCrypto, ECDSA P-256 / SHA-256) ───────── */
+const enc = s => new TextEncoder().encode(s);
+const hex = b => Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('');
+const unhex = h => { const a = new Uint8Array(h.length >> 1); for (let i = 0; i < a.length; i++) a[i] = parseInt(h.substr(i * 2, 2), 16); return a; };
+const rand = n => hex(crypto.getRandomValues(new Uint8Array(n)));
+function canon(v) { // 키를 정렬한 JSON — 서명 대상 바이트를 언제나 같게
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(canon).join(',') + ']';
+  return '{' + Object.keys(v).sort().map(k => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+}
+const EC = { name: 'ECDSA', namedCurve: 'P-256' }, SG = { name: 'ECDSA', hash: 'SHA-256' };
+async function fpOf(spki) { return hex(await crypto.subtle.digest('SHA-256', unhex(spki))); }
+async function makeKeys() { // 비밀키는 꺼낼 수 없게(extractable=false), 공개키만 내보냄
+  const k = await crypto.subtle.generateKey(EC, false, ['sign', 'verify']);
+  const spki = hex(await crypto.subtle.exportKey('spki', k.publicKey));
+  return { priv: k.privateKey, spki, fp: await fpOf(spki) };
+}
+async function signObj(priv, o) { return hex(await crypto.subtle.sign(SG, priv, enc(canon(o)))); }
+async function verifyObj(spki, o, sig) {
+  try { const k = await crypto.subtle.importKey('spki', unhex(spki), EC, false, ['verify']); return await crypto.subtle.verify(SG, k, unhex(sig), enc(canon(o))); }
+  catch (e) { return false; }
+}
+const flipByte = (h, i = 9) => h.slice(0, i * 2) + (parseInt(h.substr(i * 2, 2), 16) ^ 1).toString(16).padStart(2, '0') + h.slice(i * 2 + 2);
+const fpS = f => f ? f.slice(0, 16).toUpperCase().replace(/(.{4})/g, '$1 ').trim() + ' …' : '-';
+const hx = (h, n = 24) => h ? `<span class="mono">${h.slice(0, n)}…</span> <span class="dim">(${h.length / 2}바이트)</span>` : '-';
+const mono = s => `<span class="mono">${s}</span>`;
+
+/* ───────── 가상 인물·상태 ───────── */
+const P = { name: '김민수', birth: '1958-03-14', rrn: '580314-1', photo: '주민등록 사진(김민수)' };
+const X = { name: '박영진', birth: '1984-11-02', photo: '주민등록 사진(박영진)' };
+const pkey = p => p.name + '|' + p.birth;
+const PHOTOS = { [pkey(P)]: P.photo, [pkey(X)]: X.photo };
+const FIRST = T(2025, 4, 14, 14, 20); // 주민센터에서 처음 받은 날(대면 확인)
+const HIGH = ['휴대폰 개통', '계좌 개설', '신분증 재발급'];
+const PURPOSE = { 'present-gen': '일반 신원확인', 'present-tel': '휴대폰 개통', 'present-bank': '계좌 개설' };
+const ISSUER = '가상 발급기관(시연용)', HUBNAME = '공통기반(시연용)';
+const G5 = ['옛 신분증 확인', '옛 폰 승인 확인', '본인 확인', '근거리 확인', '이용 규칙'];
+
+const S = { sc: 1, now: 0, step: 1500, slow: 1, busy: 0, auto: null, caption: '', hint: null, tamper: null, lastPacket: null,
+  expanded: new Set(), labels: [], old: null, nw: null, lastLogLen: 0, autoError: null, far: false, assumeFace: false, gi: 0 };
+let H = null; // 공통기반(가상 중앙 시스템)
+const wait = ms => sleep(ms * S.slow);
+function newDev(role) {
+  return { role, keys: null, cred: null, undoKey: null, screen: role === 'nw' ? 'start' : 'home', flow: {}, pending: null, code: null, ble: null,
+    scanned: null, near: null, sheet: false, toast: null, notice: null, alert: null, capBlocked: false, counterDone: false,
+    lost: false, unused: false, pin: 0, reject: null, _k: '' };
+}
+const SC = {
+  1: { t: '① 정상 이어받기', s: '얼굴 대조 → 두 폰 근거리 확인 → 옛 폰 승인 → 새 폰에 다시 발급' },
+  2: { t: '② 다른 사람이 내 명의로 시도 → 얼굴 불일치로 거절', s: '얼굴이 다르면 QR이 뜨지 않고, 내 폰에 알림이 옵니다' },
+  3: { t: '③ 옛 폰 분실 → 방문·IC 안내', s: '이어줄 신분증이 없으면 지금처럼 방문하거나 IC 카드로' },
+  4: { t: '④ 30일 안에 또 이어받기 → 거절', s: '이어받기는 30일에 한 번' },
+  5: { t: '⑤ 대면 확인 6년 상한', s: '실물 신분증으로 6년마다 다시 확인 — 만료일도 그 안으로' },
+  6: { t: '⑥ 72시간 안 「내가 하지 않았어요」', s: '72시간 안이면 옛 폰의 되돌리기 열쇠로 되돌립니다' },
+  7: { t: '⑦ 만료 60일 전 → 3년 갱신', s: '알림을 받고 같은 폰에서 갱신' },
+  8: { t: '⑧ 멀리서 승인 시도 → 근거리 확인에서 거절(얼굴은 통과했다고 가정한 경우)', s: 'QR 화면을 캡처해 보내도 두 폰이 떨어져 있으면 막힙니다' },
+};
+
+/* ───────── 공통기반 ───────── */
+// 지금 신분증으로 쓸 수 있는(정상·유효기간 안) 것의 개수 — 언제나 1개 이하여야 함
+function activeNow() { let n = 0; for (const c of H.creds.values()) if (c.status === 'active' && S.now < Date.parse(c.payload.expiresAt)) n++; return n; }
+function hubLog(e, at) { e.id = ++H.seq; e.at = at === undefined ? S.now : at; H.log.push(e); H.maxActive = Math.max(H.maxActive, activeNow()); return e; }
+const cap6 = lip => addY(lip, 6);
+// 만료일 = 받은 날+3년과 마지막 대면 확인+6년 중 이른 날
+function expiryFor(issuedAt, lip) { const e3 = addY(issuedAt, 3), e6 = cap6(lip); return { exp: Math.min(e3, e6), e3, e6 }; }
+const isCapped = p => Date.parse(p.expiresAt) === cap6(Date.parse(p.lastInPersonAt)) && Date.parse(p.lastInPersonAt) !== Date.parse(p.issuedAt);
+const expNote = p => { const x = expiryFor(Date.parse(p.issuedAt), Date.parse(p.lastInPersonAt));
+  return `받은 날+3년(${fDate(x.e3)})과 대면 확인+6년(${fDate(x.e6)}) 중 이른 날 → ${fDate(Date.parse(p.expiresAt))}${isCapped(p) ? ' · 대면확인+6년으로 맞춤' : ''}`; };
+async function hubIssue({ name, birth, type = '주민등록증', holderFp, issuedAt, lastInPersonAt, transferCount, expiresAt }) {
+  const exp = Math.min(expiresAt || expiryFor(issuedAt, lastInPersonAt).exp, cap6(lastInPersonAt));
+  const payload = { id: 'MID-' + rand(3).toUpperCase(), type, name, birth, holderKeyFp: holderFp, issuedAt: iso(issuedAt),
+    expiresAt: iso(exp), lastInPersonAt: iso(lastInPersonAt), transferCount, issuer: ISSUER };
+  const sig = await signObj(H.issuer.priv, payload);
+  H.creds.set(payload.id, { status: 'active', reason: '', protectUntil: 0, payload, sig });
+  return { payload, sig };
+}
+// 되돌리기 열쇠: 옛 폰 열쇠에 묶어 공통기반이 서명한 1회용 증표(72시간). 신분증이 아니라 되돌리기만 할 수 있음
+async function hubIssueUndo({ holderFp, oldCredId, newCredId, at }) {
+  const payload = { id: 'UNDO-' + rand(3).toUpperCase(), type: '되돌리기 열쇠', holderKeyFp: holderFp, oldCredId, newCredId,
+    issuedAt: iso(at), expiresAt: iso(at + 72 * HOUR), oneTime: true, signer: HUBNAME };
+  const sig = await signObj(H.hub.priv, payload);
+  H.undoKeys.set(payload.id, { payload, sig, used: false, expired: false });
+  return { payload, sig };
+}
+async function runChecks(list) {
+  const checks = []; let failed = null;
+  for (const [n, fn, sim, g] of list) {
+    if (failed) { checks.push({ n, ok: null, sim: !!sim, g, note: '앞 검사에서 막혀 검사 안 함' }); continue; }
+    const r = await fn();
+    const c = { n, ok: !!r.ok, sim: !!sim, g, note: r.note || '', why: r.why || '' };
+    checks.push(c); if (!c.ok) failed = c;
+  }
+  return { checks, failed };
+}
+const stNote = st => !st ? '등록 안 된 신분증' : st.status === 'active' ? '정상' : st.status === 'suspended' ? `정지(${st.reason})` : `폐기 목록(${st.reason})`;
+const stWhy = st => !st ? '등록 안 된 신분증이에요' : st.status === 'suspended' ? '정지된 신분증이에요' : '폐기된 신분증이에요';
+const REASON = {
+  '옛 신분증 서명': '신분증 서명이 맞지 않아요(위조 의심)', '신분증 서명': '신분증 서명이 맞지 않아요(위조 의심)',
+  '승인 서명': '옛 폰 승인 서명이 맞지 않아요', '요청 서명': '요청 서명이 맞지 않아요', '폰 서명': '폰 서명이 맞지 않아요',
+  '되돌리기 열쇠 공통기반 서명': '되돌리기 열쇠가 맞지 않아요', '한 번만': '이미 쓴 되돌리기 열쇠예요',
+  '1회용 번호': '이미 쓴 요청이거나 시간이 지난 요청이에요', '유효기간': '신분증 유효기간이 지났어요',
+  '명의 일치': '새 폰 명의가 신분증 주인과 달라요', '얼굴 일치(공통기반 대조)': '얼굴이 신분증 주인과 달라요', '얼굴 일치': '얼굴이 신분증 주인과 달라요',
+  '두 폰 가까이(블루투스)': '새 폰이 가까이 있지 않아요. 누가 QR 화면을 보내 찍으라고 했다면 사기예요',
+  '6년 상한': '마지막 대면 확인 후 6년이 다 됐어요', '창구 본인 확인': '본인 확인이 안 됐어요',
+};
+const VISIT = ['6년 상한', '얼굴 일치', '유효기간'];
+const why = f => f ? (f.why || REASON[f.n] || f.note) : '';
+// 발급기관 서명 확인 + 신분증 종류인지(되돌리기 열쇠는 신분증으로 못 씀)
+async function chkIssuer(cred) { return cred.payload.type !== '되돌리기 열쇠' && verifyObj(H.issuer.spki, cred.payload, cred.sig); }
+async function chkHolder(cred, spki, obj, sig, idField = 'credId') {
+  const fp = await fpOf(spki); const bind = fp === cred.payload.holderKeyFp;
+  const ok = bind && obj[idField] === cred.payload.id && await verifyObj(spki, obj, sig);
+  return { fp, bind, ok };
+}
+function chkNonce(nonce, kind) {
+  const r = H.nonces.get(nonce);
+  if (!r) return { ok: false, note: '공통기반이 낸 번호가 아님' };
+  if (r.kind !== kind) return { ok: false, note: '다른 용도의 번호' };
+  if (r.used) return { ok: false, note: '이미 쓴 번호(같은 요청을 다시 보냄)' };
+  if (S.now - r.createdAt > 10 * MIN) return { ok: false, note: '10분이 지난 번호' };
+  return { ok: true, note: `${fHM(r.createdAt)} 발급 · 처음 사용`, rec: r };
+}
+function useNonce(n) { const r = H.nonces.get(n); if (r && !r.used) { r.used = true; r.usedAt = S.now; } }
+const holderMsg = (h, what) => !h.bind ? `${what}에 묶인 폰 열쇠가 아님` : h.ok ? `${what}에 묶인 폰 열쇠로 서명됨` : '서명이 내용과 안 맞음';
+const vrow = (label, sig, res) => [label, hx(sig), res];
+const cnt = p => p.transferCount ? `이어받기 ${p.transferCount}회차` : '처음 발급';
+const chkValid = p => async () => { const e = Date.parse(p.expiresAt); const c = isCapped(p);
+  return { ok: S.now < e, note: `${fDate(e)}까지${c ? ' (대면 확인 6년 상한)' : ''}`, why: c ? '대면 확인 후 6년이 지나 신분증이 끝났어요' : '' }; };
+const chkProtect = st => async () => { const pu = (st && st.protectUntil) || 0; const ok = S.now >= pu;
+  return { ok, note: !pu ? '보호 대상 아님' : ok ? '보호 기간 끝남' : `${fShort(pu)}까지 보호 중`, why: `이어받은 지 72시간이 안 돼 지금은 안 돼요 (${fShort(pu)}부터)` }; };
+const chkSixYears = p => async () => { const l = Date.parse(p.lastInPersonAt), lim = cap6(l); const ok = S.now < lim;
+  return { ok, note: `마지막 대면 확인 ${fDate(l)} · ${ok ? fDate(lim) + '까지 쓸 수 있음' : '6년 지남'}` }; };
+const findHolder = owner => [S.old, S.nw].find(x => x && x.cred && x.cred.payload.name === owner.name && x.cred.payload.birth === owner.birth
+  && (H.creds.get(x.cred.payload.id) || {}).status === 'active');
+
+// 이어받기 준비 · 얼굴 대조: 새 폰이 찍은 얼굴을 공통기반이 바로 명의자 주민등록 사진과 대조. 맞을 때만 1회용 번호(→ QR)
+function hubPrepare(d, owner, face) {
+  const photo = PHOTOS[pkey(owner)]; const ok = !!photo && face === photo; const assumed = S.assumeFace;
+  const note = assumed ? '통과(가정 — 얼굴 인증이 뚫렸다고 보는 경우)' : ok ? `${mask(owner.name)} 주민등록 사진과 같은 사람` : `${mask(owner.name)} 주민등록 사진과 다른 사람`;
+  const checks = [{ n: '얼굴 일치(공통기반 대조)', ok, sim: true, note }];
+  const D = [['명의 확인 결과', `${mask(owner.name)} 명의 (시뮬레이션)`], ['얼굴 대조', `새 폰 촬영본 ↔ ${photo || '-'} · ${ok ? (assumed ? '통과(가정)' : '같은 사람') : '다른 사람'} (시뮬레이션)`],
+    ['새 폰 공개키 지문', mono(fpS(d.keys.fp))]];
+  if (!ok) {
+    const victim = findHolder(owner); if (victim && victim !== d) victim.alert = { at: S.now };
+    hubLog({ kind: 'prepare', ok: false, title: '이어받기 준비 · 얼굴 대조', checks,
+      result: `거절 — 얼굴 일치(공통기반 대조): ${note} · QR 안 띄움${victim && victim !== d ? ' · 명의자 폰에 알림' : ''}`,
+      details: D, data: { attemptPhoneKeyFp: d.keys.fp } });
+    return null;
+  }
+  const nonce = rand(16), ble = rand(8);
+  H.nonces.set(nonce, { kind: 'transfer', createdAt: S.now, used: false, newSpki: d.keys.spki, newFp: d.keys.fp, owner, face, faceOk: true, assumed, ble });
+  D.push(['1회용 번호', hx(nonce, 16)]);
+  hubLog({ kind: 'prepare', ok: true, badge: '대조 통과', title: '이어받기 준비 · 얼굴 대조', checks,
+    result: '새 폰 열쇠 등록 · 1회용 번호 발급(10분 유효) · 새 폰에 QR 표시', details: D,
+    data: { newPhoneSpki: d.keys.spki, newPhoneKeyFp: d.keys.fp, nonce } });
+  return { nonce, ble };
+}
+
+// 이어받기 요청: 다섯 가지 확인 → 새 폰 열쇠에 묶어 다시 발급, 옛 신분증은 바로 폐기 목록, 옛 폰엔 되돌리기 열쇠
+async function hubTransfer(pkt, tamperNote) {
+  const { cred, oldSpki, approval, approvalSig } = pkt; const p = cred.payload; const st = H.creds.get(p.id);
+  const info = {}; let rec = null;
+  const R = await runChecks([
+    ['옛 신분증 서명', async () => { info.issuer = await chkIssuer(cred); return { ok: info.issuer, note: info.issuer ? '발급기관 공개키로 검증됨' : '신분증 내용과 발급기관 서명이 안 맞음' }; }, false, 0],
+    ['유효기간', chkValid(p), false, 0],
+    ['정지·폐기 아님', async () => ({ ok: !!st && st.status === 'active', note: stNote(st), why: stWhy(st) }), false, 0],
+    ['승인 서명', async () => { info.h = await chkHolder(cred, oldSpki, approval, approvalSig); return { ok: info.h.ok, note: holderMsg(info.h, '신분증') }; }, false, 1],
+    ['1회용 번호', async () => { const r = chkNonce(approval.nonce, 'transfer'); if (r.ok && r.rec.newFp !== approval.newKeyFp) return { ok: false, note: '요청 때 등록한 새 폰 열쇠와 다름' }; rec = r.rec || null; return r; }, false, 1],
+    ['얼굴 일치(공통기반 대조)', async () => ({ ok: !!rec.faceOk, note: rec.assumed ? `${fHM(rec.createdAt)} 대조 통과(가정)` : `${fHM(rec.createdAt)} 대조 통과 · QR 띄우기 전에 확인` }), true, 2],
+    ['명의 일치', async () => ({ ok: rec.owner.name === p.name && rec.owner.birth === p.birth, note: `새 폰 명의 ${mask(rec.owner.name)} · 신분증 주인 ${mask(p.name)}` }), true, 2],
+    ['두 폰 가까이(블루투스)', async () => { const ok = !!approval.nearToken && approval.nearToken === rec.ble;
+      return { ok, note: ok ? '옛 폰이 새 폰 블루투스 신호를 받음' : '옛 폰이 새 폰 블루투스 신호를 받지 못함(멀리 있음)' }; }, true, 3],
+    ['72시간 보호', chkProtect(st), false, 4],
+    ['30일 제한', async () => {
+      const last = H.transfers.filter(t => t.person === pkey(p) && !t.reverted).map(t => t.at).sort((a, b) => a - b).pop();
+      const ok = !last || S.now - last >= 30 * DAY;
+      return { ok, note: last ? `마지막 이어받기 ${fDate(last)} · ${ok ? '30일 지남' : fShort(last + 30 * DAY) + '부터 가능'}` : '이어받기 이력 없음',
+        why: last ? `이어받기는 30일에 한 번만 돼요 (${fShort(last + 30 * DAY)}부터)` : '' };
+    }, false, 4],
+    ['6년 상한', chkSixYears(p), false, 4],
+  ]);
+  useNonce(approval.nonce);
+  const ok = !R.failed; let newCred = null, newOk = null, undoKey = null, ukOk = null;
+  if (ok) {
+    newCred = await hubIssue({ name: p.name, birth: p.birth, type: p.type, holderFp: rec.newFp, issuedAt: S.now,
+      lastInPersonAt: Date.parse(p.lastInPersonAt), transferCount: p.transferCount + 1 });
+    Object.assign(st, { status: 'revoked', reason: '새 폰으로 옮겨짐' });
+    H.creds.get(newCred.payload.id).protectUntil = S.now + 72 * HOUR;
+    undoKey = await hubIssueUndo({ holderFp: p.holderKeyFp, oldCredId: p.id, newCredId: newCred.payload.id, at: S.now });
+    H.transfers.push({ at: S.now, person: pkey(p), from: p.id, to: newCred.payload.id, reverted: false });
+    newOk = await verifyObj(H.issuer.spki, newCred.payload, newCred.sig) && newCred.payload.holderKeyFp === rec.newFp;
+    ukOk = await verifyObj(H.hub.spki, undoKey.payload, undoKey.sig);
+  }
+  const D = [];
+  if (tamperNote) D.push(['위조 시험', `<b class="vn">${tamperNote}</b>`]);
+  D.push(['옛 신분증', `${p.id} · ${p.type} · ${mask(p.name)} · ${cnt(p)}`]);
+  D.push(vrow('발급기관 서명', cred.sig, info.issuer));
+  if (info.h) {
+    D.push(['옛 폰 공개키 지문', mono(fpS(info.h.fp))]);
+    D.push(['신분증에 묶인 지문', mono(fpS(p.holderKeyFp)), info.h.bind ? '일치' : '불일치']);
+    D.push(vrow('승인 서명', approvalSig, info.h.ok));
+  }
+  D.push(['승인 내용', `새 폰 열쇠 ${mono(fpS(approval.newKeyFp))} · 번호 ${mono(approval.nonce.slice(0, 12) + '…')} · 승인 ${fHM(Date.parse(approval.approvedAt))}`]);
+  if (rec) {
+    D.push(['얼굴 (시뮬레이션)', `${fHM(rec.createdAt)} 새 폰 촬영본 ↔ ${PHOTOS[pkey(rec.owner)] || '-'} 대조 통과${rec.assumed ? '(가정)' : ''}`]);
+    D.push(['명의 (시뮬레이션)', `새 폰 ${mask(rec.owner.name)} ↔ 신분증 ${mask(p.name)}`]);
+    D.push(['근거리 (시뮬레이션)', approval.nearToken ? `새 폰 블루투스 신호값 ${mono(approval.nearToken.slice(0, 8) + '…')} 받음` : '새 폰 블루투스 신호 못 받음']);
+  }
+  if (newCred) {
+    D.push(['새 신분증', `${newCred.payload.id} · 새 폰 열쇠 ${mono(fpS(newCred.payload.holderKeyFp))} · ${cnt(newCred.payload)}`]);
+    D.push(['새 만료일', expNote(newCred.payload)]);
+    D.push(vrow('새 신분증 서명', newCred.sig, newOk));
+    D.push(['옛 신분증 처리', `${p.id} → 폐기 목록 등록(바로 효력 정지)`]);
+    D.push(['되돌리기 열쇠', `${undoKey.payload.id} · 옛 폰 열쇠에 묶음 · 1회용 · ${fShort(Date.parse(undoKey.payload.expiresAt))}까지`]);
+    D.push(vrow('공통기반 서명', undoKey.sig, ukOk));
+  }
+  hubLog({ kind: 'transfer', ok, badge: '발급', title: '이어받기 요청', checks: R.checks,
+    result: ok ? '새 폰에 발급 · 옛 폰 신분증은 바로 폐기 목록 · 옛 폰엔 되돌리기 열쇠(72시간) · 두 번호로 문자 알림' + (isCapped(newCred.payload) ? ' · 만료일 대면확인+6년으로 맞춤' : '')
+      : `거절 — ${R.failed.n}: ${R.failed.note}` + (R.failed.n === '1회용 번호' ? '' : ' · 옛 번호로 문자 알림'),
+    details: D, data: { cred, oldPhoneSpki: oldSpki, approval, approvalSig, newCred, undoKey, tamper: tamperNote || null } });
+  return { ok, failed: R.failed, why: why(R.failed), visit: !!R.failed && VISIT.includes(R.failed.n), six: !!R.failed && (R.failed.n === '6년 상한' || (R.failed.n === '유효기간' && isCapped(p))), newCred, undoKey };
+}
+
+// 제출: 폰이 1회용 번호에 서명해 내밀면 공통기반이 확인
+async function hubPresent({ cred, spki, req, sig }) {
+  const p = cred.payload; const st = H.creds.get(p.id); const hi = HIGH.includes(req.purpose); const info = {};
+  const list = [
+    ['신분증 서명', async () => { info.issuer = await chkIssuer(cred); return { ok: info.issuer, note: info.issuer ? '발급기관 공개키로 검증됨' : '발급기관이 서명한 신분증이 아님' }; }],
+    ['폰 서명', async () => { info.h = await chkHolder(cred, spki, req, sig); return { ok: info.h.ok, note: holderMsg(info.h, '신분증') }; }],
+    ['1회용 번호', async () => chkNonce(req.nonce, 'present')],
+    ['유효기간', chkValid(p)],
+    ['정지·폐기 아님', async () => ({ ok: !!st && st.status === 'active', note: stNote(st), why: stWhy(st) })],
+  ];
+  if (hi) list.push(['72시간 보호', chkProtect(st)]);
+  const R = await runChecks(list); useNonce(req.nonce); const ok = !R.failed;
+  const D = [['제출처', `${req.purpose}${hi ? ' (72시간 동안 막는 제출)' : ''}`], ['신분증', `${p.id} · ${cnt(p)}`], vrow('발급기관 서명', cred.sig, info.issuer)];
+  if (info.h) { D.push(['폰 공개키 지문', mono(fpS(info.h.fp)), info.h.bind ? '일치' : '불일치']); D.push(vrow('폰 서명', sig, info.h.ok)); }
+  D.push(['1회용 번호', hx(req.nonce, 16)]);
+  hubLog({ kind: 'present', ok, badge: '확인', title: `제출 확인 · ${req.purpose}`, checks: R.checks,
+    result: ok ? '확인 완료' : `거절 — ${R.failed.n}: ${R.failed.note}`, details: D, data: { cred, phoneSpki: spki, request: req, signature: sig } });
+  return { ok, failed: R.failed, why: why(R.failed) };
+}
+
+// 되돌리기(내가 하지 않았어요): 옛 폰이 되돌리기 열쇠와 자기 열쇠 서명으로 요청 → 새 폰 신분증 폐기, 옛 폰 열쇠에 다시 발급
+async function hubUndo({ undoKey, spki, req, sig }) {
+  const u = undoKey.payload; const rec = H.undoKeys.get(u.id); const info = {};
+  const R = await runChecks([
+    ['되돌리기 열쇠 공통기반 서명', async () => { info.sig = u.type === '되돌리기 열쇠' && await verifyObj(H.hub.spki, u, undoKey.sig); return { ok: info.sig, note: info.sig ? '공통기반 공개키로 검증됨' : '서명이 안 맞음' }; }],
+    ['요청 서명', async () => { info.h = await chkHolder(undoKey, spki, req, sig, 'undoKeyId'); return { ok: info.h.ok, note: holderMsg(info.h, '열쇠') }; }],
+    ['1회용 번호', async () => chkNonce(req.nonce, 'undo')],
+    ['72시간 안', async () => { const e = Date.parse(u.expiresAt); const ok = S.now < e;
+      return { ok, note: ok ? `${fShort(e)}까지 되돌릴 수 있음` : `${fShort(e)}에 열쇠 만료`, why: '72시간이 지나 되돌릴 수 없어요' }; }],
+    ['한 번만', async () => ({ ok: !!rec && !rec.used, note: !rec ? '공통기반에 없는 열쇠' : rec.used ? '이미 쓴 열쇠' : '처음 사용' })],
+  ]);
+  useNonce(req.nonce); const ok = !R.failed; let restored = null, rOk = null;
+  if (ok) {
+    rec.used = true;
+    const tr = H.transfers.find(t => t.to === u.newCredId && !t.reverted); if (tr) tr.reverted = true;
+    Object.assign(H.creds.get(u.newCredId), { status: 'revoked', reason: '옛 폰 주인이 되돌림', protectUntil: 0 });
+    const op = H.creds.get(u.oldCredId).payload;
+    restored = await hubIssue({ name: op.name, birth: op.birth, type: op.type, holderFp: u.holderKeyFp, issuedAt: S.now,
+      lastInPersonAt: Date.parse(op.lastInPersonAt), transferCount: op.transferCount, expiresAt: Date.parse(op.expiresAt) });
+    rOk = await verifyObj(H.issuer.spki, restored.payload, restored.sig);
+  }
+  const D = [['되돌리기 열쇠', `${u.id} · ${fShort(Date.parse(u.expiresAt))}까지 · 1회용`], vrow('공통기반 서명', undoKey.sig, info.sig)];
+  if (info.h) { D.push(['옛 폰 공개키 지문', mono(fpS(info.h.fp)), info.h.bind ? '일치' : '불일치']); D.push(vrow('요청 서명', sig, info.h.ok)); }
+  if (ok) {
+    D.push(['폐기한 신분증', `${u.newCredId} (새 폰)`]);
+    D.push(['다시 발급한 신분증', `${restored.payload.id} · 옛 폰 열쇠 ${mono(fpS(restored.payload.holderKeyFp))} · ${fDate(Date.parse(restored.payload.expiresAt))}까지(원래 만료일)`]);
+    D.push(vrow('다시 발급 서명', restored.sig, rOk));
+  }
+  hubLog({ kind: 'undo', ok, badge: '되돌림', title: '되돌리기 요청 · 내가 하지 않았어요', checks: R.checks,
+    result: ok ? '새 폰 신분증 바로 폐기 · 옛 폰 열쇠에 다시 발급 · 두 번호로 문자 알림' : `거절 — ${R.failed.n}: ${R.failed.note}`,
+    details: D, data: { undoKey, phoneSpki: spki, request: req, signature: sig, newCred: restored } });
+  return { ok, failed: R.failed, why: why(R.failed), restored };
+}
+
+// 분실 신고 창구에서 되돌리기: 옛 폰이 없을 때(보상판매 등) 누리집·콜센터·주민센터에서 본인 확인 뒤
+async function hubCounterUndo(identityOk) {
+  const cand = [...H.undoKeys.values()].filter(u => !u.used && !u.expired).pop();
+  const R = await runChecks([
+    ['창구 본인 확인', async () => ({ ok: identityOk, note: identityOk ? '본인 확인됨' : '본인 확인 안 됨' }), true],
+    ['되돌릴 이어받기(72시간 안)', async () => { const e = cand ? Date.parse(cand.payload.expiresAt) : 0; const ok = !!cand && S.now < e;
+      return { ok, note: ok ? `${fShort(Date.parse(cand.payload.issuedAt))} 이어받기 · ${fShort(e)}까지 되돌릴 수 있음` : '72시간 안의 이어받기 없음' }; }],
+    ['한 번만', async () => ({ ok: !!cand && !cand.used, note: cand && !cand.used ? '처음 사용' : '이미 되돌림' })],
+  ]);
+  const ok = !R.failed;
+  if (ok) {
+    const u = cand.payload; cand.used = true;
+    const tr = H.transfers.find(t => t.to === u.newCredId && !t.reverted); if (tr) tr.reverted = true;
+    Object.assign(H.creds.get(u.newCredId), { status: 'revoked', reason: '분실 신고 창구에서 되돌림', protectUntil: 0 });
+    const holder = [S.old, S.nw].find(d => d && d.undoKey && d.undoKey.payload.id === u.id);
+    if (holder) { holder.undoKey = null; holder.counterDone = true; holder.screen = 'deleted'; }
+  }
+  const D = [['창구', '누리집 · 콜센터(1688-0990) · 주민센터'], ['본인 확인', `${identityOk ? '확인됨' : '안 됨'} (시뮬레이션)`]];
+  if (cand) D.push(['되돌리기 대상', `${cand.payload.oldCredId} → ${cand.payload.newCredId}`]);
+  if (ok) D.push(['처리', `${cand.payload.newCredId}(새 폰) 폐기 · 되돌리기 열쇠 ${cand.payload.id} 사용 처리`]);
+  hubLog({ kind: 'counter', ok, badge: '되돌림', title: '분실 신고 창구 · 되돌리기', checks: R.checks,
+    result: ok ? '새 폰 신분증 바로 폐기 · 옛 폰이 없으니 신분증은 방문하거나 IC 주민등록증으로 다시 받기 · 두 번호로 문자 알림' : `거절 — ${R.failed.n}: ${R.failed.note}`,
+    details: D, data: cand ? { undoKey: { payload: cand.payload, sig: cand.sig } } : null });
+  return { ok, failed: R.failed };
+}
+
+// 3년 갱신: 얼굴 인증 + 지금 신분증으로 서명. 만료일은 대면 확인+6년을 넘지 않음
+async function hubRenew({ cred, spki, req, sig }) {
+  const p = cred.payload; const st = H.creds.get(p.id); const info = {};
+  const R = await runChecks([
+    ['신분증 서명', async () => { info.issuer = await chkIssuer(cred); return { ok: info.issuer, note: info.issuer ? '발급기관 공개키로 검증됨' : '서명이 안 맞음' }; }],
+    ['요청 서명', async () => { info.h = await chkHolder(cred, spki, req, sig); return { ok: info.h.ok, note: holderMsg(info.h, '신분증') }; }],
+    ['1회용 번호', async () => chkNonce(req.nonce, 'renew')],
+    ['유효기간', chkValid(p)],
+    ['정지·폐기 아님', async () => ({ ok: !!st && st.status === 'active', note: stNote(st), why: stWhy(st) })],
+    ['얼굴 일치', async () => { const ok = req.face === PHOTOS[pkey(p)]; return { ok, note: ok ? '주민등록 사진과 같은 사람' : '주민등록 사진과 다른 사람' }; }, true],
+    ['72시간 보호', chkProtect(st)],
+    ['갱신 기간', async () => { const left = Math.ceil((Date.parse(p.expiresAt) - S.now) / DAY); const ok = left <= 60;
+      return { ok, note: `만료 ${left}일 전 (60일 전부터 가능)`, why: '갱신은 만료 60일 전부터 돼요' }; }],
+    ['6년 상한', async () => { const l = Date.parse(p.lastInPersonAt), lim = cap6(l), ne = Math.min(addY(S.now, 3), lim);
+      const ok = ne > Date.parse(p.expiresAt);
+      return { ok, note: ok ? `새 만료일 ${fDate(ne)}${ne === lim ? ' (대면 확인+6년으로 맞춤)' : ''}` : `마지막 대면 확인 ${fDate(l)} · 6년 상한 ${fDate(lim)} — 더 늘릴 수 없음`,
+        why: '마지막 대면 확인 후 6년이 다 돼 갱신할 수 없어요' }; }],
+  ]);
+  useNonce(req.nonce); const ok = !R.failed; let newCred = null;
+  if (ok) {
+    newCred = await hubIssue({ name: p.name, birth: p.birth, type: p.type, holderFp: p.holderKeyFp, issuedAt: S.now,
+      lastInPersonAt: Date.parse(p.lastInPersonAt), transferCount: p.transferCount });
+    Object.assign(st, { status: 'revoked', reason: '갱신으로 교체' });
+  }
+  const D = [['지금 신분증', `${p.id} · ${fDate(Date.parse(p.expiresAt))}까지`], vrow('발급기관 서명', cred.sig, info.issuer)];
+  if (info.h) { D.push(['폰 공개키 지문', mono(fpS(info.h.fp)), info.h.bind ? '일치' : '불일치']); D.push(vrow('요청 서명', sig, info.h.ok)); }
+  D.push(['얼굴 (시뮬레이션)', `촬영본 ↔ ${PHOTOS[pkey(p)] || '-'}`]);
+  if (newCred) { D.push(['새 신분증', `${newCred.payload.id} · 같은 폰 열쇠`]); D.push(['새 만료일', expNote(newCred.payload)]); D.push(vrow('새 신분증 서명', newCred.sig, await verifyObj(H.issuer.spki, newCred.payload, newCred.sig))); }
+  hubLog({ kind: 'renew', ok, badge: '갱신', title: '갱신 요청', checks: R.checks,
+    result: ok ? `새 유효기간 ${fDate(Date.parse(newCred.payload.expiresAt))}까지 발급(${isCapped(newCred.payload) ? '대면확인+6년으로 맞춤' : '받은 날+3년'}) · 지금 신분증은 폐기 목록으로` : `거절 — ${R.failed.n}: ${R.failed.note}`,
+    details: D, data: { cred, phoneSpki: spki, request: req, signature: sig, newCred } });
+  return { ok, failed: R.failed, why: why(R.failed), visit: !!R.failed && VISIT.includes(R.failed.n), six: !!R.failed && R.failed.n === '6년 상한', newCred };
+}
+
+// 시간이 지나 생기는 일: 되돌리기 열쇠 만료(72시간), 만료 60일 전 알림, 만료 — 일어난 그 시각으로 기록
+function hubTick() {
+  const ev = [];
+  for (const [id, u] of H.undoKeys) { const t = Date.parse(u.payload.expiresAt); if (!u.used && !u.expired && t <= S.now) ev.push({ t, k: 'undo', id, u }); }
+  for (const d of [S.old, S.nw]) {
+    if (!d || !d.cred) continue; const p = d.cred.payload, st = H.creds.get(p.id);
+    if (!st || st.status !== 'active') continue;
+    const exp = Date.parse(p.expiresAt), tn = Math.max(exp - 60 * DAY, Date.parse(p.issuedAt), H.t0);
+    if (!H.notified.has(p.id) && tn <= S.now && tn < exp) ev.push({ t: tn, k: 'notice', id: p.id, exp });
+    if (!H.expired.has(p.id) && exp <= S.now) ev.push({ t: exp, k: 'exp', id: p.id, exp, p });
+  }
+  ev.sort((a, b) => a.t - b.t);
+  for (const e of ev) {
+    if (e.k === 'undo') {
+      e.u.expired = true;
+      hubLog({ kind: 'expire', ok: true, badge: '끝', title: '72시간 지남', result: '되돌리기 열쇠 만료 · 이제 되돌릴 수 없음 · 새 폰 보호 끝',
+        details: [['만료된 되돌리기 열쇠', `${e.id} (옛 폰)`], ['새 신분증', `${e.u.payload.newCredId} — 이제 개통·계좌 개설·재발급도 가능`]] }, e.t);
+      const holder = [S.old, S.nw].find(d => d && d.undoKey && d.undoKey.payload.id === e.id);
+      if (holder) { holder.undoKey = null; holder.screen = 'deleted'; holder.sheet = false; holder.toast = null; }
+    } else if (e.k === 'notice') {
+      H.notified.add(e.id);
+      hubLog({ kind: 'notice', ok: null, title: '만료 60일 전 알림', result: `앱 알림 발송 — ${Math.ceil((e.exp - e.t) / DAY)}일 남음 (${fDate(e.exp)} 만료)` }, e.t);
+    } else {
+      H.expired.add(e.id);
+      hubLog({ kind: 'notice', ok: null, title: '유효기간 만료', result: `${e.id} — ${fDate(e.exp)} 만료${isCapped(e.p) ? ' (대면 확인 6년 상한) · 방문해 IC 주민등록증으로 바꾸기 안내' : ''}` }, e.t);
+    }
+  }
+  for (const d of [S.old, S.nw]) {
+    if (!d) continue; d.notice = null; if (!d.cred) continue;
+    const p = d.cred.payload, st = H.creds.get(p.id), exp = Date.parse(p.expiresAt);
+    if (st && st.status === 'active' && H.notified.has(p.id) && S.now < exp) d.notice = { left: Math.ceil((exp - S.now) / DAY), exp };
+  }
+}
+function bump(m = 1) { S.now += m * MIN; hubTick(); }
+function advance(ms, label) { const from = S.now; hubLog({ kind: 'time', title: `시간 이동 ${label}`, result: `→ ${fDT(from + ms)}` }); S.now = from + ms; hubTick(); }
+const slog = text => hubLog({ kind: 'setup', title: '준비', result: text });
+
+/* ───────── 시나리오 준비 ───────── */
+async function issueTo(d, issuedAt, lip, cnt) {
+  if (!d.keys) d.keys = await makeKeys();
+  d.cred = await hubIssue({ name: P.name, birth: P.birth, holderFp: d.keys.fp, issuedAt, lastInPersonAt: lip, transferCount: cnt });
+  return d.cred.payload.id;
+}
+const revoke = (id, reason) => Object.assign(H.creds.get(id), { status: 'revoked', reason });
+async function setup(n) {
+  S.sc = n; S.lastPacket = null; S.expanded = new Set(); S.lastLogLen = 0; S.gi = 0; S.hint = null; // 위조 시험 대기는 유지(자동 시연에도 적용)
+  S.far = n === 8; S.assumeFace = n === 8;
+  S.now = n === 5 ? T(2031, 2, 11, 15, 0) : n === 7 ? T(2028, 2, 14, 14, 20) : T(2026, 10, 8, 10, 0);
+  H = { issuer: await makeKeys(), hub: await makeKeys(), creds: new Map(), undoKeys: new Map(), nonces: new Map(), transfers: [],
+    notified: new Set(), expired: new Set(), log: [], seq: 0, maxActive: 0, t0: S.now };
+  S.old = newDev('old'); S.nw = newDev('nw');
+  S.labels = [{ tag: '옛 폰', desc: '쓰던 폰' }, { tag: '새 폰', desc: '새로 산 폰' }];
+  const who = `김민수(1958년생)`;
+  if (n === 1 || n === 2 || n === 3 || n === 8) {
+    await issueTo(S.old, FIRST, FIRST, 0);
+    slog(`${who} — 2025. 4. 14. 주민센터에서 QR로 발급(대면 확인)`);
+    if (n === 2) { S.labels[0].desc = '쓰던 폰 (명의자)'; S.labels[1].desc = '다른 사람이 내 명의로 개통한 폰'; }
+    if (n === 3) {
+      S.old.lost = true; Object.assign(H.creds.get(S.old.cred.payload.id), { status: 'suspended', reason: '분실 신고' });
+      hubLog({ kind: 'info', ok: null, title: '분실 신고 접수', result: '옛 폰 신분증 정지' });
+      S.labels[0].desc = '잃어버림';
+    }
+    if (n === 8) {
+      slog('사기범이 멀리서 새 폰으로 이어받기를 시작하고, 전화로 피해자를 속여 QR 화면 캡처를 옛 폰으로 찍게 함 · 얼굴 인증은 통과했다고 가정');
+      S.labels = [{ tag: '옛 폰', desc: '쓰던 폰 (피해자)' }, { tag: '새 폰', desc: '멀리 있는 사기범 폰 · 얼굴 통과 가정' }];
+    }
+  } else if (n === 4) {
+    const A = newDev('old'); const aId = await issueTo(A, FIRST, FIRST, 0);
+    const tt = T(2026, 9, 28, 14, 20); const B = newDev('old'); const bId = await issueTo(B, tt, FIRST, 1);
+    revoke(aId, '새 폰으로 옮겨짐');
+    H.transfers.push({ at: tt, person: pkey(P), from: aId, to: bId, reverted: false });
+    S.old = B;
+    slog(`${who} — 2025. 4. 14. 주민센터 발급 → 2026. 9. 28. 지금의 옛 폰으로 이어받음(10일 전)`);
+    S.labels = [{ tag: '옛 폰', desc: '10일 전에 이어받은 폰' }, { tag: '새 폰', desc: '또 바꾼 폰' }];
+  } else if (n === 5) {
+    const tt = T(2030, 9, 3, 15, 10); await issueTo(S.old, tt, FIRST, 1);
+    H.transfers.push({ at: tt, person: pkey(P), from: 'MID-이전', to: S.old.cred.payload.id, reverted: false });
+    slog(`${who} — 2025. 4. 14. 주민센터 발급(마지막 대면 확인)`);
+    slog('2028. 2. 갱신 → 2030. 9. 3. 지금의 옛 폰으로 이어받음 · 만료일은 대면 확인+6년인 2031. 4. 14.로 맞춰짐');
+  } else if (n === 6) {
+    const oId = await issueTo(S.old, FIRST, FIRST, 0);
+    const tt = T(2026, 10, 8, 8, 0); const nId = await issueTo(S.nw, tt, FIRST, 1);
+    revoke(oId, '새 폰으로 옮겨짐');
+    H.creds.get(nId).protectUntil = tt + 72 * HOUR;
+    S.old.undoKey = await hubIssueUndo({ holderFp: S.old.keys.fp, oldCredId: oId, newCredId: nId, at: tt });
+    S.old.cred = null;
+    H.transfers.push({ at: tt, person: pkey(P), from: oId, to: nId, reverted: false });
+    S.nw.screen = 'home';
+    slog(`${who} — 2025. 4. 14. 주민센터 발급`);
+    slog('오늘 08:00 모르는 폰으로 이어받기가 됨(주인은 모르는 일) · 옛 폰 신분증 폐기, 되돌리기 열쇠 발급 · 두 번호로 문자 알림');
+    S.labels[1].desc = '내가 모르는 폰';
+  } else if (n === 7) {
+    await issueTo(S.old, FIRST, FIRST, 0); S.nw.unused = true;
+    slog(`${who} — 2025. 4. 14. 주민센터 발급(유효기간 3년)`);
+    S.labels = [{ tag: '내 폰', desc: '쓰던 폰' }, { tag: '새 폰', desc: '이 시나리오에선 안 씀' }];
+  }
+  hubTick();
+}
+
+/* ───────── 폰 동작 ───────── */
+function resetNew(d) { Object.assign(d, { screen: 'start', flow: {}, pending: null, code: null, ble: null, keys: null, reject: null, toast: null }); }
+async function prepare(d) {
+  d.screen = 'making'; render(); await wait(800);
+  d.keys = await makeKeys(); bump(1);
+  const owner = d.flow.owner === 'self' ? { name: P.name, birth: P.birth } : { name: X.name, birth: X.birth };
+  const face = d.flow.face === 'self' ? P.photo : X.photo;
+  const r = hubPrepare(d, owner, face);
+  if (!r) { d.screen = 'fail'; d.reject = { why: '얼굴이 신분증 주인과 달라요', visit: true, stage: 'face' }; d.keys = null; return; }
+  d.pending = { nonce: r.nonce, t: iso(S.now) }; d.ble = r.ble;
+  d.code = ['MIDX1', r.nonce, d.keys.fp, iso(S.now)].join('|'); // 연결 코드: 새 폰 공개키 지문 + 1회용 번호
+  d.screen = 'qr';
+}
+async function scan(d) {
+  const n = S.nw; if (n.screen !== 'qr' || !n.code) return;
+  const [, nonce, fp, t] = n.code.split('|'); const rec = H.nonces.get(nonce);
+  d.scanned = { nonce, fp, t, owner: rec ? rec.owner.name : '' };
+  n.screen = 'waiting';
+  d.screen = 'near'; d.near = 'checking'; render(); await wait(1100);
+  const near = !S.far; // 시뮬레이션: ⑧에서는 두 폰이 멀리 떨어져 있어 블루투스 신호를 못 받음
+  d.scanned.nearToken = near ? n.ble : null;
+  d.near = near ? 'ok' : 'fail'; render(); await wait(1100);
+  d.screen = 'approve';
+}
+async function approve(d) {
+  const sc = d.scanned; if (!sc) return;
+  d.screen = 'sending'; render(); await wait(500); bump(1);
+  const approval = { type: '이어받기 승인', credId: d.cred.payload.id, newKeyFp: sc.fp, nonce: sc.nonce, nearToken: sc.nearToken || null, requestedAt: sc.t, approvedAt: iso(S.now) };
+  let approvalSig = await signObj(d.keys.priv, approval); let cred = d.cred; let tamper = null;
+  if (S.tamper === 'sig') { approvalSig = flipByte(approvalSig); tamper = '승인 서명 10번째 바이트를 바꿔 보냄'; }
+  if (S.tamper === 'cred') { cred = { payload: { ...cred.payload, birth: '1968-03-14' }, sig: cred.sig }; tamper = '신분증 생년을 1958→1968로 고쳐 보냄'; }
+  S.tamper = null;
+  const pkt = { cred, oldSpki: d.keys.spki, approval, approvalSig }; S.lastPacket = pkt;
+  const res = await hubTransfer(pkt, tamper);
+  const n = S.nw; const mine = n.pending && n.pending.nonce === approval.nonce;
+  if (res.ok) {
+    d.cred = null; d.undoKey = res.undoKey; d.notice = null; d.screen = 'home'; // 옛 폰엔 신분증이 남지 않고 되돌리기 열쇠만
+    if (mine) { n.cred = res.newCred; n.screen = 'home'; n.pending = null; n.ble = null; }
+    hubTick();
+  } else {
+    d.screen = 'rejected'; d.reject = { ...res, what: 'give' };
+    if (mine) { n.screen = 'fail'; n.reject = res.failed && res.failed.n === '두 폰 가까이(블루투스)' ? { ...res, why: '옛 폰이 가까이 있지 않아요' } : res; n.pending = null; n.ble = null; }
+  }
+  d.scanned = null; d.near = null;
+}
+async function present(d, purpose) {
+  d.sheet = false; bump(1);
+  const nonce = rand(16); H.nonces.set(nonce, { kind: 'present', createdAt: S.now, used: false }); // 확인하는 쪽이 내는 1회용 번호
+  const req = { type: '제출', purpose, credId: d.cred.payload.id, nonce, at: iso(S.now) };
+  const sig = await signObj(d.keys.priv, req);
+  const res = await hubPresent({ cred: d.cred, spki: d.keys.spki, req, sig });
+  d.toast = { ok: res.ok, text: res.ok ? `${purpose} — 확인됐어요` : `${purpose} — ${res.why}` };
+}
+async function undoSend(d) {
+  d.screen = 'sending'; render(); await wait(500); bump(1);
+  const nonce = rand(16); H.nonces.set(nonce, { kind: 'undo', createdAt: S.now, used: false });
+  const req = { type: '되돌리기 요청', undoKeyId: d.undoKey.payload.id, nonce, at: iso(S.now) };
+  const sig = await signObj(d.keys.priv, req);
+  const res = await hubUndo({ undoKey: d.undoKey, spki: d.keys.spki, req, sig });
+  if (res.ok) { d.cred = res.restored; d.undoKey = null; d.screen = 'home'; d.toast = { ok: true, text: '이 폰에 신분증을 다시 받았어요. 새 폰 신분증은 폐기됐어요' }; hubTick(); }
+  else { d.screen = 'rejected'; d.reject = { ...res, what: 'undo' }; }
+}
+async function renewSend(d) {
+  d.screen = 'sending'; render(); await wait(500); bump(1);
+  const nonce = rand(16); H.nonces.set(nonce, { kind: 'renew', createdAt: S.now, used: false });
+  const req = { type: '갱신 요청', credId: d.cred.payload.id, nonce, face: d.flow.face === 'self' ? P.photo : X.photo, at: iso(S.now) };
+  const sig = await signObj(d.keys.priv, req);
+  const res = await hubRenew({ cred: d.cred, spki: d.keys.spki, req, sig });
+  if (res.ok) { d.cred = res.newCred; d.notice = null; d.screen = 'home'; d.toast = { ok: true, text: `갱신됐어요 — ${fDate(Date.parse(res.newCred.payload.expiresAt))}까지` }; hubTick(); }
+  else { d.screen = 'rejected'; d.reject = { ...res, what: 'renew' }; if (res.six) d.capBlocked = true; }
+}
+async function fillPin(d) { for (let i = d.pin + 1; i <= 6; i++) { d.pin = i; render(); await wait(70); } }
+async function replay() {
+  const m = $('#hmsg');
+  if (!S.lastPacket) { m.textContent = '먼저 이어받기 승인을 한 번 보내 보세요.'; return; }
+  bump(1); const r = await hubTransfer(S.lastPacket, '방금 보낸 승인 꾸러미를 그대로 다시 보냄');
+  m.textContent = r.ok ? '통과했습니다.' : `공통기반이 거절했습니다 — ${r.failed.n}`;
+}
+const counterReady = () => !!H && [...H.undoKeys.values()].some(u => !u.used && !u.expired);
+async function counterUndo(ok) {
+  bump(1); const r = await hubCounterUndo(ok);
+  $('#cmsg').textContent = r.ok ? '되돌렸습니다. 새 폰 신분증은 폐기됐습니다.' : `거절됐습니다 — ${r.failed.n}`;
+}
+
+/* ───────── 행동 처리 ───────── */
+const FREE = new Set(['help', 'help-close', 'export', 'auto', 'counter-close']);
+function advanceGuide(who, a) { const st = STEPS[S.sc] || []; for (let j = S.gi; j < st.length; j++) if (st[j][0] === who && st[j][1] === a) { S.gi = j + 1; return; } }
+async function doAct(who, a) {
+  if (S.busy && !FREE.has(a)) return;
+  S.busy++;
+  try { const r = await handle(who, a); if (!S.auto && r !== 'blocked') advanceGuide(who, a); } catch (err) { console.error(err); }
+  finally { S.busy--; render(); }
+}
+function setHint(text) { S.hint = { text, until: Date.now() + 4000 }; setTimeout(render, 4100); }
+async function handle(who, a) {
+  const d = who === 'old' ? S.old : who === 'nw' ? S.nw : null;
+  if (d && !a.startsWith('pin-')) d.toast = null;
+  switch (a) {
+    case 'reset': return setup(S.sc);
+    case 'scenario': return setup(+$('#sc').value);
+    case 'auto': if (S.auto) S.auto.stop = true; else autoplay([S.sc]); return;
+    case 't72': return advance(72 * HOUR, '+72시간');
+    case 't30': return advance(30 * DAY, '+30일');
+    case 't3y': return advance(addY(S.now, 3) - S.now, '+3년');
+    case 'help': $('#hmsg').textContent = ''; $('#help').showModal(); return;
+    case 'help-close': $('#help').close(); return;
+    case 'counter-open': if (counterReady()) { $('#cmsg').textContent = ''; $('#counter').showModal(); } return;
+    case 'counter-close': $('#counter').close(); return;
+    case 'counter-ok': return counterUndo(true);
+    case 'counter-no': return counterUndo(false);
+    case 'export': return exportLog();
+    case 'tamper-sig': S.tamper = 'sig'; $('#hmsg').textContent = '다음 이어받기 승인 때 서명 1바이트를 바꿔 보냅니다.'; return;
+    case 'tamper-cred': S.tamper = 'cred'; $('#hmsg').textContent = '다음 이어받기 승인 때 신분증 생년을 고쳐 보냅니다.'; return;
+    case 'replay': return replay();
+  }
+  if (!d) return;
+  switch (a) {
+    case 'start-transfer': d.flow = {}; d.screen = 'owner'; break;
+    case 'no-old': d.screen = 'nophone'; break;
+    case 'owner-self': case 'owner-other': d.flow.owner = a === 'owner-self' ? 'self' : 'other'; d.screen = 'face'; break;
+    case 'face-self': case 'face-other':
+      d.flow.face = a === 'face-self' ? 'self' : 'other';
+      if (d.screen === 'renew-face') d.screen = 'renew-sign'; else await prepare(d);
+      break;
+    case 'restart': resetNew(d); break;
+    case 'give-start':
+      if (S.nw.unused) { setHint('이 시나리오에서는 새 폰을 쓰지 않아요'); return 'blocked'; }
+      if (S.nw.screen !== 'qr') { setHint('새 폰에서 먼저 시작해요 — 새 폰의 「옛 폰에서 이어받기」부터 눌러 주세요'); return 'blocked'; }
+      d.screen = 'pin'; d.pin = 0; break;
+    case 'pin-digit': d.pin = Math.min(6, d.pin + 1); if (d.pin === 6) { render(); await wait(150); d.screen = 'scan'; } break;
+    case 'pin-ok': await fillPin(d); await wait(120); d.screen = 'scan'; break;
+    case 'cancel': d.screen = 'home'; d.scanned = null; d.near = null; if (S.nw.screen === 'waiting') S.nw.screen = 'qr'; break;
+    case 'scan': await scan(d); break;
+    case 'approve': await approve(d); break;
+    case 'ok': d.screen = 'home'; d.reject = null; break;
+    case 'report':
+      hubLog({ kind: 'report', ok: true, badge: '접수', title: '신고 접수 · 내 명의 이어받기 시도', result: '시도 기록(시각·시도한 폰 열쇠 지문)과 함께 접수 (시뮬레이션)',
+        details: [['시도 시각', d.alert ? fShort(d.alert.at) : '-'], ['신고한 폰', '명의자의 옛 폰']] });
+      d.alert = null; d.toast = { ok: true, text: '신고했어요' }; break;
+    case 'undo-open': d.screen = 'undo'; d.pin = 0; break;
+    case 'undo-send': d.pin = 0; await fillPin(d); await undoSend(d); break;
+    case 'renew-start': d.screen = 'renew-face'; d.flow = {}; break;
+    case 'renew-send': d.pin = 0; await fillPin(d); await renewSend(d); break;
+    case 'present-open': d.sheet = true; break;
+    case 'sheet-close': d.sheet = false; break;
+    case 'present-gen': case 'present-tel': case 'present-bank': await present(d, PURPOSE[a]); break;
+  }
+}
+document.addEventListener('click', e => {
+  const ent = e.target.closest('[data-ent]');
+  if (ent && !e.target.closest('.det')) { const id = +ent.dataset.ent; S.expanded.has(id) ? S.expanded.delete(id) : S.expanded.add(id); renderLog(true); return; }
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const ph = b.closest('.phone'); const who = ph ? ph.dataset.who : 'top'; const a = b.dataset.act;
+  if (S.auto && !FREE.has(a)) return;
+  if (b.closest('dialog#help') && a.startsWith('tamper')) setTimeout(() => $('#help').close(), 600);
+  doAct(who, a);
+});
+$('#sc').addEventListener('change', () => doAct('top', 'scenario'));
+
+/* ───────── 그리기 ───────── */
+const IC = {
+  person: '<svg viewBox="0 0 72 90" width="72" height="90"><rect width="72" height="90" fill="#e9edf1"/><circle cx="36" cy="34" r="15" fill="#bcc5cf"/><path d="M8 90c2-19 13-29 28-29s26 10 28 29z" fill="#bcc5cf"/></svg>',
+  face: '<svg viewBox="0 0 120 120" width="150" height="150"><circle cx="60" cy="46" r="24" fill="#c3ccd6"/><path d="M14 120c3-28 22-42 46-42s43 14 46 42z" fill="#c3ccd6"/></svg>',
+  phone: '<svg viewBox="0 0 80 120" width="86" height="128"><rect x="6" y="2" width="68" height="116" rx="12" fill="#fff" stroke="#9fb0c0" stroke-width="3"/><rect x="16" y="18" width="48" height="70" rx="4" fill="#e2f1ef"/><circle cx="40" cy="102" r="5" fill="#9fb0c0"/><path d="M28 52l8 8 16-16" stroke="#0e6b66" stroke-width="5" fill="none" stroke-linecap="round"/></svg>',
+  card: '<svg viewBox="0 0 120 80" width="120" height="80"><rect x="3" y="3" width="114" height="74" rx="10" fill="#fff" stroke="#b9c4cf" stroke-width="3" stroke-dasharray="7 6"/><rect x="16" y="20" width="26" height="34" rx="4" fill="#e3e8ed"/><rect x="52" y="24" width="48" height="7" rx="3" fill="#e3e8ed"/><rect x="52" y="40" width="34" height="7" rx="3" fill="#e3e8ed"/></svg>',
+  finger: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6.5 8.5a6 6 0 0 1 11 3.3v1.7"/><path d="M9 11.5a3 3 0 0 1 6 0v2c0 2.6-.9 4.8-2.4 6.5"/><path d="M12 11.5v2.2c0 2-.6 3.9-1.7 5.4"/><path d="M5.5 12.5v1.2c0 1.6-.4 3-1 4.3"/><path d="M17.5 16.5c-.3 1.5-.8 2.8-1.5 4"/></svg>',
+  key: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="14" r="4"/><path d="M11 11l8-8M16 6l2 2M14 8l2 2"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3L2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg>',
+  bt: '<svg viewBox="0 0 24 24" width="54" height="54" fill="none" stroke="#0e6b66" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>',
+  bars: '<svg viewBox="0 0 34 12" width="34" height="12"><rect x="0" y="8" width="3" height="4" fill="#1c222a"/><rect x="4.5" y="6" width="3" height="6" fill="#1c222a"/><rect x="9" y="3" width="3" height="9" fill="#1c222a"/><rect x="13.5" y="0" width="3" height="12" fill="#1c222a"/><rect x="20" y="1" width="12" height="10" rx="2.5" fill="none" stroke="#1c222a" stroke-width="1.4"/><rect x="21.8" y="2.8" width="7.6" height="6.4" rx="1" fill="#1c222a"/><rect x="32.4" y="4" width="1.6" height="4" rx=".8" fill="#1c222a"/></svg>',
+};
+const OK = (n = 12) => `<svg class="i" width="${n}" height="${n}" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.2 6.4l2.5 2.5 5.1-5.6"/></svg>`;
+const NO = (n = 12) => `<svg class="i" width="${n}" height="${n}" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>`;
+// QR처럼 보이는 그림(실제 QR 아님). 연결 코드의 16진수 비트로 칸을 채움
+function pseudoQR(seed) {
+  const N = 25, g = [], fx = [];
+  for (let i = 0; i < N; i++) { g.push(Array(N).fill(0)); fx.push(Array(N).fill(false)); }
+  const finder = (r, c) => { for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) { const y = r + i, x = c + j; if (y < 0 || x < 0 || y >= N || x >= N) continue; fx[y][x] = true;
+    g[y][x] = (i >= 0 && i <= 6 && j >= 0 && j <= 6 && (i === 0 || i === 6 || j === 0 || j === 6 || (i >= 2 && i <= 4 && j >= 2 && j <= 4))) ? 1 : 0; } };
+  finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
+  for (let i = 8; i < N - 8; i++) { g[6][i] = g[i][6] = i % 2 === 0 ? 1 : 0; fx[6][i] = fx[i][6] = true; }
+  const bits = []; for (const ch of seed) { const v = parseInt(ch, 16) || 0; for (let b = 3; b >= 0; b--) bits.push((v >> b) & 1); }
+  let k = 0; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { if (fx[y][x]) continue; g[y][x] = bits[k % bits.length] ^ (((y * 3 + x * 5 + ((k / bits.length) | 0)) % 4) === 0 ? 1 : 0); k++; }
+  let path = ''; for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (g[y][x]) path += `M${x} ${y}h1v1h-1z`;
+  return `<svg viewBox="-1 -1 ${N + 2} ${N + 2}" shape-rendering="crispEdges"><rect x="-1" y="-1" width="${N + 2}" height="${N + 2}" fill="#fff"/><path d="${path}" fill="#111"/></svg>`;
+}
+const visitBox = () => `<div class="visit"><b>지금처럼 이렇게 받으세요</b>
+  <div class="vopt"><b>주민센터 방문</b><span>실물 주민등록증을 가져가면 QR로 발급(무료)</span></div>
+  <div class="vopt"><b>IC 주민등록증</b><span>카드를 폰 뒤에 대면 방문 없이 발급</span></div></div>`;
+const visitBox6 = () => `<div class="visit"><b>실물 신분증으로 한 번 다시 확인해요</b>
+  <div class="vopt"><b>IC 주민등록증으로 바꾸기 (권장)</b><span>주민센터에서 한 번 바꾸면, 그 뒤로는 카드를 폰에 대서 방문 없이 발급</span></div>
+  <div class="vopt"><b>주민센터 QR 발급</b><span>실물 주민등록증을 가져가면 무료</span></div></div>`;
+
+function cardHTML(d) {
+  const p = d.cred.payload, st = H.creds.get(p.id) || {}, exp = Date.parse(p.expiresAt), expired = S.now >= exp;
+  let cls = '', ov = '';
+  if (st.status === 'suspended') { cls = 'off'; ov = `<div class="cov bad"><span>정지됨</span></div>`; }
+  else if (st.status === 'revoked') { cls = 'off'; ov = `<div class="cov bad"><span>폐기됨</span></div>`; }
+  else if (expired) { cls = 'off'; ov = `<div class="cov"><span>만료됨</span></div>`; }
+  const prot = st.status === 'active' && st.protectUntil > S.now;
+  return `<div class="idcard ${cls}">
+    <div class="ctop"><span>${p.type}</span><span class="cm">모바일</span></div>
+    <div class="cmid"><div class="cphoto">${IC.person}</div><div><div class="cname">${p.name}</div>
+      <div class="crow mono">${P.rrn}●●●●●●</div><div class="crow">발급 ${fDate(Date.parse(p.issuedAt))}</div></div></div>
+    <div class="cbot"><span>유효기간</span><b>${fDate(exp)}까지</b></div>
+    <div class="cchips">${p.transferCount > 0 ? `<span class="chip">이어받기 ${p.transferCount}회차</span>` : ''}${isCapped(p) ? '<span class="chip cap">대면 확인 6년 상한</span>' : ''}${prot ? `<span class="chip prot">${IC.shield}보호 중 · ${fShort(st.protectUntil)}까지</span>` : ''}</div>
+    ${ov}</div>`;
+}
+const movedHTML = d => { const e = Date.parse(d.undoKey.payload.expiresAt);
+  return `<div class="empty moved">${IC.card}<b>이 폰의 신분증은<br>새 폰으로 옮겨졌어요</b><span>72시간 안에 되돌릴 수 있어요</span></div>
+    <div class="ukey">${IC.key}<div><b>되돌리기 열쇠</b><small>1회용 · 공통기반 서명 · ${fShort(e)}까지</small></div></div>
+    <div class="acts"><button class="btn danger" data-act="undo-open">내가 하지 않았어요</button></div>`; };
+const goneHTML = d => d && d.counterDone
+  ? `<div class="empty">${IC.card}<b>분실 신고 창구에서<br>되돌렸어요</b><span>새 폰 신분증은 폐기됐어요.<br>신분증은 방문하거나 IC 주민등록증으로 다시 받아요</span></div>`
+  : `<div class="empty">${IC.card}<b>이 폰의 신분증은<br>새 폰으로 옮겨졌어요</b></div>`;
+function startHTML() {
+  return `<div class="empty">${IC.card}<b>이 폰에는 아직<br>신분증이 없어요</b></div>
+    <div class="acts"><button class="btn pri" data-act="start-transfer">옛 폰에서 이어받기</button><button class="link" data-act="no-old">옛 폰이 없어요</button></div>`;
+}
+function homeHTML(d) {
+  if (!d.cred) return d.undoKey ? movedHTML(d) : d.role === 'old' ? goneHTML(d) : startHTML();
+  const p = d.cred.payload, st = H.creds.get(p.id) || {}, expired = S.now >= Date.parse(p.expiresAt);
+  let h = '';
+  if (d.alert) h += `<div class="notice alert"><div><b>내 명의로 이어받기 시도가 있었어요</b><small>${fShort(d.alert.at)} · 얼굴이 달라 막혔어요. 내가 한 게 아니면 신고해 주세요</small></div><button class="btn danger" data-act="report">신고</button></div>`;
+  if (d.notice && st.status === 'active' && !expired) h += d.capBlocked
+    ? `<div class="notice"><div><b>유효기간이 ${d.notice.left}일 남았어요</b><small>대면 확인 6년 상한이라 갱신 대신 방문해 주세요</small></div></div>`
+    : `<div class="notice"><div><b>유효기간이 ${d.notice.left}일 남았어요</b><small>${fDate(d.notice.exp)} 만료</small></div><button class="btn pri" data-act="renew-start">갱신하기</button></div>`;
+  h += cardHTML(d);
+  if (d.toast) h += `<div class="toast ${d.toast.ok ? 'ok' : 'bad'}">${d.toast.ok ? OK(14) : NO(14)} ${d.toast.text}</div>`;
+  if (st.status === 'active' && expired) {
+    h += `<div class="infobox bad"><b>${isCapped(p) ? '대면 확인 후 6년이 지났어요' : '유효기간이 지났어요'}</b><span>이어받기·갱신은 안 되고 한 번 방문해야 해요</span></div>${isCapped(p) ? visitBox6() : visitBox()}`;
+    return h;
+  }
+  if (st.status === 'revoked') h += `<div class="infobox bad"><b>이 신분증은 폐기됐어요</b><span>${st.reason === '옛 폰 주인이 되돌림' ? '옛 폰 주인이 이어받기를 되돌렸어요' : st.reason}</span></div>`;
+  if (st.status === 'suspended') h += `<div class="infobox bad"><b>이 신분증은 정지됐어요</b><span>${st.reason}</span></div>`;
+  h += `<div class="acts"><button class="btn pri" data-act="present-open">제출하기</button>${d.role === 'old' && st.status === 'active' ? '<button class="btn" data-act="give-start">새 폰으로 이어주기</button>' : ''}</div>`;
+  return h;
+}
+const dots = d => `<div class="dots">${[0, 1, 2, 3, 4, 5].map(i => `<i class="${i < d.pin ? 'on' : ''}"></i>`).join('')}</div>`;
+function screenHTML(d) {
+  const r = d.reject;
+  switch (d.screen) {
+    case 'home': return homeHTML(d);
+    case 'start': return startHTML();
+    case 'deleted': return goneHTML(d);
+    case 'owner': return `<span class="stepno">1 / 3</span><h3>본인 명의 휴대폰 확인<span class="sim">시뮬레이션</span></h3>
+      <div class="illo">${IC.phone}</div>
+      <div class="acts"><button class="btn pri" data-act="owner-self">본인 명의</button><button class="btn" data-act="owner-other">다른 사람 명의</button></div>`;
+    case 'face': case 'renew-face': return `${d.screen === 'face' ? '<span class="stepno">2 / 3</span>' : '<span class="stepno">갱신</span>'}<h3>얼굴 인증<span class="sim">시뮬레이션</span>${S.assumeFace && d.screen === 'face' ? '<span class="sim assume">가정: 통과</span>' : ''}</h3>
+      <div class="illo"><div class="facering">${IC.face}</div></div>
+      <div class="acts"><button class="btn pri" data-act="face-self">본인 얼굴</button><button class="btn" data-act="face-other">다른 사람 얼굴</button></div>`;
+    case 'making': return `<div class="empty"><div class="spin"></div><b>공통기반이 얼굴을<br>주민등록 사진과 대조하고 있어요</b></div>`;
+    case 'qr': { const [, nonce, fp] = d.code.split('|');
+      return `<span class="stepno">3 / 3</span><h3>옛 폰으로 이 QR을<br>찍어 주세요</h3>
+      <div class="qrbox">${pseudoQR(nonce + fp)}</div>
+      <div class="codeline mono">새 폰 열쇠 ${fpS(fp)}<br>1회용 번호 ${nonce.slice(0, 16).toUpperCase()}…</div>
+      <ul class="ticks"><li>${OK(14)}명의 확인</li><li>${OK(14)}얼굴 일치 확인됨(공통기반 대조)${S.assumeFace ? ' · 가정' : ''}</li><li>${OK(14)}이 폰에 새 열쇠 만듦 · 블루투스 신호 켬</li></ul>
+      <button class="link" data-act="no-old" style="margin-top:auto">옛 폰이 없어요</button>`; }
+    case 'waiting': return `<div class="empty"><div class="spin"></div><b>옛 폰에서 승인하기를<br>기다리고 있어요</b></div>`;
+    case 'fail': return `<div class="result bad"><div class="ricon">${NO(28)}</div><h3>이어받기가 안 됐어요</h3><p>${r ? r.why : ''}</p></div>
+      ${r && r.six ? visitBox6() : r && r.visit ? visitBox() : ''}<div class="acts"><button class="btn" data-act="restart">처음으로</button></div>`;
+    case 'nophone': return `<h3>옛 폰이 없으면<br>이어받을 수 없어요</h3>${visitBox()}<div class="acts"><button class="btn" data-act="restart">처음으로</button></div>`;
+    case 'pin': return `<h3 class="center">PIN 입력</h3>${dots(d)}
+      <div class="keypad">${'123456789'.split('').map(k => `<button data-act="pin-digit">${k}</button>`).join('')}<span></span><button data-act="pin-digit">0</button><button class="kx" data-act="cancel">취소</button></div>
+      <div class="acts"><button class="btn" data-act="pin-ok">${IC.finger}지문으로 확인</button></div>`;
+    case 'scan': { const can = S.nw.screen === 'qr' && !S.nw.unused;
+      return `<h3>새 폰 QR 촬영</h3><div class="finder">${can ? `<div class="ghost">${pseudoQR(S.nw.code.split('|')[1] + S.nw.code.split('|')[2])}</div>` : '<em>새 폰 화면에 QR이 아직 없어요</em>'}<i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></div>
+      <div class="acts"><button class="btn pri" data-act="scan" ${can ? '' : 'disabled'}>QR 촬영</button><button class="link" data-act="cancel">취소</button></div>`; }
+    case 'near': return `<h3>두 폰이 가까이 있는지<br>확인해요<span class="sim">시뮬레이션</span></h3>
+      <div class="illo"><div class="radar ${d.near}"><i></i><i></i>${IC.bt}</div></div>
+      ${d.near === 'checking' ? '<p class="center">블루투스로 새 폰 신호를 찾는 중…</p>'
+        : d.near === 'ok' ? `<div class="toast ok">${OK(14)} 새 폰이 바로 옆에 있어요</div>` : `<div class="toast bad">${NO(14)} 근처에서 새 폰 신호를 찾지 못했어요</div>`}`;
+    case 'approve': { const s = d.scanned; const near = !!s.nearToken;
+      return `<h3>새 폰으로 신분증을<br>옮길까요?</h3>
+      <dl class="kv"><dt>명의</dt><dd class="y">확인됨 · ${mask(s.owner)}</dd><dt>얼굴</dt><dd class="y">일치 확인됨(공통기반 대조)</dd>
+        <dt>두 폰 거리</dt><dd class="${near ? 'y' : 'n'}">${near ? '가까이 있음(블루투스)' : '가까이 없음'}</dd><dt>요청 시각</dt><dd>${fHM(Date.parse(s.t))}</dd></dl>
+      <div class="warnbox">${IC.warn}<span>${near ? '누가 전화로 시켜서 하는 거라면 지금 멈추세요.' : '새 폰이 옆에 없어요. 누가 QR 화면을 보내 찍으라고 했다면 사기예요.'}</span></div>
+      <div class="acts"><button class="btn pri" data-act="approve">이어주기 승인</button><button class="btn danger" data-act="cancel">멈추기</button></div>`; }
+    case 'sending': return `<div class="empty"><div class="spin"></div><b>공통기반에서<br>확인하고 있어요</b></div>`;
+    case 'rejected': { const t = r.what === 'renew' ? '갱신이 안 됐어요' : r.what === 'undo' ? '되돌리기가 안 됐어요' : '이어주기가 안 됐어요';
+      const still = d.cred && (H.creds.get(d.cred.payload.id) || {}).status === 'active';
+      return `<div class="result bad"><div class="ricon">${NO(28)}</div><h3>${t}</h3><p>${r.why}</p>${still ? '<p class="sub">신분증은 이 폰에 그대로 있어요</p>' : ''}</div>
+      ${r.six ? visitBox6() : ''}<div class="acts"><button class="btn" data-act="ok">확인</button></div>`; }
+    case 'undo': return `<h3>내가 하지 않은<br>이어받기인가요?</h3><p>새 폰 신분증을 바로 폐기하고<br>이 폰에 다시 발급받아요.</p>${dots(d)}
+      <div class="acts"><button class="btn dangerfill" data-act="undo-send">${IC.finger}지문으로 확인하고 되돌리기</button><button class="link" data-act="ok">취소</button></div>`;
+    case 'renew-sign': { const e = Date.parse(d.cred.payload.expiresAt), ne = Math.min(addY(S.now, 3), cap6(Date.parse(d.cred.payload.lastInPersonAt)));
+      return `<span class="stepno">갱신</span><h3>유효기간을<br>새로 받아요</h3>
+      <dl class="kv"><dt>지금</dt><dd>${fDate(e)}까지</dd><dt>갱신 후</dt><dd class="${ne > e ? 'y' : 'n'}">${ne > e ? fDate(ne) + '까지' : '늘어나지 않음'}</dd><dt>얼굴 인증</dt><dd class="y">촬영함</dd></dl>
+      ${dots(d)}
+      <div class="acts"><button class="btn pri" data-act="renew-send">${IC.finger}지문으로 확인하고 갱신</button><button class="link" data-act="ok">취소</button></div>`; }
+  }
+  return '';
+}
+function sheetHTML() {
+  return `<div class="sheetbg" data-act="sheet-close"></div><div class="sheet"><h4>어디에 내시나요?</h4>
+    <button class="opt" data-act="present-gen"><span>일반 신원확인<br><small>병원·편의점·공항 등</small></span></button>
+    <button class="opt hi" data-act="present-tel">휴대폰 개통</button>
+    <button class="opt hi" data-act="present-bank">계좌 개설</button>
+    <button class="link" data-act="sheet-close">닫기</button></div>`;
+}
+function renderPhone(d, id) {
+  const el = $('#' + id + ' .scr');
+  if (d.unused) { el.innerHTML = `<div class="sbar"><span>${fHM(S.now)}</span>${IC.bars}</div><div class="unused">이 시나리오에서는<br>쓰지 않아요</div>`; }
+  else {
+    const key = [d.screen, d.cred ? d.cred.payload.id : '', d.cred && H.creds.get(d.cred.payload.id) ? H.creds.get(d.cred.payload.id).status : '', d.undoKey ? d.undoKey.payload.id : ''].join('|');
+    const enter = key !== d._k; d._k = key;
+    el.innerHTML = `<div class="sbar"><span>${fHM(S.now)}</span>${IC.bars}</div>
+      <div class="demo">시연용 가상 화면 — 실제 모바일 신분증 앱이 아님</div>
+      <div class="abar"><span class="alogo">ID</span><b>내 신분증</b></div>
+      <div class="body${enter ? ' enter' : ''}">${screenHTML(d)}</div>
+      ${d.sheet ? sheetHTML() : ''}
+      ${d.lost ? '<div class="lostov"><div><b>잃어버린 폰</b><span>이 폰은 지금 없어요</span></div></div>' : ''}`;
+  }
+  $('#' + id).classList.toggle('off', !!d.unused);
+  const L = id === 'old' ? S.labels[0] : S.labels[1];
+  $('#lab-' + id).innerHTML = `<span class="ctag">${L.tag}</span>${esc(L.desc)}`;
+}
+function vcell(r) {
+  if (r === true) return `<td class="r"><span class="vy">${OK(11)} verify = true</span></td>`;
+  if (r === false) return `<td class="r"><span class="vn">${NO(11)} verify = false</span></td>`;
+  if (r === '일치') return `<td class="r"><span class="vy">${OK(11)} 일치</span></td>`;
+  if (r === '불일치') return `<td class="r"><span class="vn">${NO(11)} 불일치</span></td>`;
+  return '<td class="r"></td>';
+}
+const chipHTML = c => `<span class="ck ${c.ok === true ? 'y' : c.ok === false ? 'n' : 's'}${c.sim ? ' sim' : ''}" title="${esc(c.note || '')}">${c.n} ${c.ok === true ? OK(11) : c.ok === false ? NO(11) : '–'}</span>`;
+function checksHTML(e) {
+  if (!e.checks) return '';
+  if (e.kind !== 'transfer') return `<div class="checks">${e.checks.map(chipHTML).join('')}</div>`;
+  return `<div class="g5"><div class="g5h">다섯 가지 확인 <span>(세부 검사 ${e.checks.length}개)</span></div><div class="g5b">${G5.map((gn, i) => {
+    const cs = e.checks.filter(c => c.g === i); const st = cs.some(c => c.ok === false) ? 'n' : cs.every(c => c.ok === true) ? 'y' : 's';
+    return `<div class="grp ${st}"><span class="gn">${'①②③④⑤'[i]} ${gn}</span>${cs.map(chipHTML).join('')}</div>`; }).join('')}</div></div>`;
+}
+function entHTML(e, isNew) {
+  const cls = e.kind === 'setup' ? 'setup' : e.kind === 'time' ? 'time' : e.ok === true ? 'ok' : e.ok === false ? 'bad' : 'info';
+  const badge = e.ok === true ? `<span class="badge ok">${e.badge || '통과'}</span>` : e.ok === false ? '<span class="badge bad">거절</span>' : '';
+  const det = e.details && e.details.length, open = S.expanded.has(e.id);
+  if (cls === 'setup' || cls === 'time') return `<li class="ent ${cls}" data-id="${e.id}"><div class="eh"><time>${fHM(e.at)}</time><b>${e.title}</b><span>${esc(e.result || '')}</span></div></li>`;
+  return `<li class="ent ${cls}${det ? ' clk' : ''}${isNew ? ' flash' : ''}" data-id="${e.id}" ${det ? `data-ent="${e.id}"` : ''}>
+    <div class="eh"><time>${fHM(e.at)}</time><b>${e.title}</b>${badge}</div>${checksHTML(e)}
+    ${e.result ? `<div class="res">${e.ok === true || e.ok === false ? '→ ' : ''}${esc(e.result)}</div>` : ''}
+    ${det ? `<div class="more">${open ? '▾ 접기' : e.details.some(x => x[2] === true || x[2] === false) ? '▸ 서명값·검증 결과 보기' : '▸ 자세히 보기'}</div>` : ''}
+    ${det && open ? `<table class="det">${e.details.map(([k, v, r]) => `<tr><th>${k}</th><td>${v}</td>${vcell(r)}</tr>`).join('')}</table>` : ''}</li>`;
+}
+function renderLog(keepScroll) {
+  const ol = $('#log'); const grew = H.log.length > S.lastLogLen; const prev = S.lastLogLen;
+  let html = '', day = '';
+  for (const e of H.log) { const dd = fDay(e.at); if (dd !== day) { html += `<li class="day">${dd}</li>`; day = dd; } html += entHTML(e, grew && e.id > prev && prev > 0); }
+  const st = ol.scrollTop; ol.innerHTML = html;
+  if (grew && !keepScroll) ol.scrollTop = ol.scrollHeight; else ol.scrollTop = st;
+  S.lastLogLen = H.log.length;
+  $('#hmeta').innerHTML = `<span>발급기관 공개키 지문 <b class="mono">${fpS(H.issuer.fp)}</b></span><span>공통기반 공개키 지문 <b class="mono">${fpS(H.hub.fp)}</b></span><span>ECDSA P-256 · SHA-256 (브라우저 내장 WebCrypto)</span><span><span class="simk">점선</span> 시뮬레이션 결과</span>`;
+}
+function renderTop() {
+  $('#clock').textContent = fDT(S.now);
+  $('#autoBtn').textContent = S.auto ? '멈춤' : '자동 시연';
+  $('#sc').value = String(S.sc); $('#sc').disabled = !!S.auto;
+  $('#top [data-act="reset"]').disabled = !!S.auto;
+  $('#counterBtn').disabled = !!S.auto || !counterReady();
+  const tc = $('#tchip'); tc.hidden = !S.tamper;
+  tc.textContent = S.tamper === 'sig' ? '위조 시험 대기 · 승인 서명 1바이트 바꿈' : S.tamper === 'cred' ? '위조 시험 대기 · 신분증 생년 고침' : '';
+  const hint = S.hint && Date.now() < S.hint.until ? S.hint.text : '';
+  $('#strip').innerHTML = S.caption ? `<span class="spill cap">${esc(S.caption)}</span>` : hint ? `<span class="spill hint">${esc(hint)}</span>` : '';
+}
+function renderGuide() {
+  document.querySelectorAll('.next').forEach(x => x.classList.remove('next'));
+  if (S.auto) return;
+  const st = (STEPS[S.sc] || [])[S.gi]; if (!st) return;
+  const el = findAct(st[0], st[1]); if (el) el.classList.add('next');
+}
+function render() { if (!H) return; renderTop(); renderPhone(S.old, 'old'); renderPhone(S.nw, 'nw'); renderLog(); renderGuide(); }
+function fit() {
+  const th = $('#top').offsetHeight, v = $('#view'); v.style.top = th + 'px';
+  const vw = v.clientWidth, vh = v.clientHeight;
+  const s = Math.max(.3, Math.min(1.6, vh / 850, vw / 1300));
+  const st = $('#stage'); st.style.width = (vw / s) + 'px'; st.style.transform = `scale(${s})`;
+}
+addEventListener('resize', fit);
+
+/* ───────── 자동 시연(직접 누를 때 주황 테두리도 이 순서를 따름) ───────── */
+const NEW3 = [['nw', 'start-transfer', '새 폰 — 옛 폰에서 이어받기'], ['nw', 'owner-self', '새 폰 — 본인 명의 확인'], ['nw', 'face-self', '새 폰 — 얼굴 인증, 공통기반이 바로 대조']];
+const OLD4 = [['old', 'give-start', '옛 폰 — 새 폰으로 이어주기'], ['old', 'pin-ok', '옛 폰 — 지문으로 확인'],
+  ['old', 'scan', '옛 폰 — 새 폰 QR 촬영, 블루투스로 근거리 확인'], ['old', 'approve', '옛 폰 — 확인 내용과 경고문을 보고 승인', 1600]];
+const GIVE = [...NEW3, ...OLD4];
+const STEPS = {
+  1: [...GIVE,
+    ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-tel', '새 폰 — 휴대폰 개통에 제출 (72시간 보호)'],
+    ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-gen', '새 폰 — 일반 신원확인에 제출'],
+    ['top', 't72', '72시간 뒤로'], ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-tel', '새 폰 — 휴대폰 개통에 제출']],
+  2: [NEW3[0], ['nw', 'owner-self', '새 폰 — 명의 확인(내 명의로 개통된 폰)'], ['nw', 'face-other', '새 폰 — 다른 사람 얼굴 → 공통기반이 바로 거절'],
+    ['old', 'report', '옛 폰 — 시도 알림을 보고 신고', 1200]],
+  3: [['nw', 'no-old', '새 폰 — 옛 폰이 없어요']],
+  4: [...GIVE, ['top', 't30', '30일 뒤로'], ['old', 'ok', '옛 폰 — 확인'], ['nw', 'restart', '새 폰 — 처음으로'], ...GIVE],
+  5: [...GIVE, ['top', 't72', '72시간 뒤로 — 그사이 만료 60일 전 알림'], ['nw', 'renew-start', '새 폰 — 갱신하기', 600],
+    ['nw', 'face-self', '새 폰 — 본인 얼굴로 인증'], ['nw', 'renew-send', '새 폰 — 지문으로 확인하고 갱신']],
+  6: [['old', 'undo-open', '옛 폰 — 내가 하지 않았어요', 600], ['old', 'undo-send', '옛 폰 — 지문으로 확인하고 되돌리기'],
+    ['nw', 'present-open', '새 폰 — 제출하기'], ['nw', 'present-gen', '새 폰 — 일반 신원확인 시도'],
+    ['old', 'present-open', '옛 폰 — 제출하기'], ['old', 'present-gen', '옛 폰 — 일반 신원확인']],
+  7: [['old', 'renew-start', '내 폰 — 갱신하기', 600], ['old', 'face-self', '내 폰 — 본인 얼굴로 인증'], ['old', 'renew-send', '내 폰 — 지문으로 확인하고 갱신']],
+  8: [NEW3[0], ['nw', 'owner-self', '새 폰 — 명의 확인(내 명의로 개통된 폰)'], ['nw', 'face-self', '새 폰 — 얼굴 인증(통과했다고 가정)'],
+    ['old', 'give-start', '옛 폰 — 전화로 속은 피해자가 이어주기 시작'], ['old', 'pin-ok', '옛 폰 — 지문으로 확인'],
+    ['old', 'scan', '옛 폰 — 메신저로 받은 QR 캡처를 촬영, 근거리 확인 실패'], ['old', 'approve', '옛 폰 — 그래도 승인을 누름', 1600]],
+};
+function findAct(who, a) { const root = who === 'top' ? $('#top') : $('#' + who); return root.querySelector(`[data-act="${a}"]:not([disabled])`); }
+async function showTitle(n, t2, s2, ms) {
+  if (S.step < 500) return;
+  $('#ovt').textContent = t2 || SC[n].t; $('#ovs').textContent = s2 || SC[n].s; $('#ovs2').textContent = n ? '' : '얼굴 인증·명의 확인·근거리 확인은 시뮬레이션 · 전자서명과 검증은 실제(WebCrypto)';
+  $('#ovl').classList.add('show');
+  await sleep(ms || 2400); $('#ovl').classList.remove('show'); await sleep(350);
+}
+async function autoplay(list, opt = {}) {
+  if (S.auto) return; S.auto = { stop: false }; S.autoError = null; render();
+  try {
+    if (list.length > 1) await showTitle(0, '신분증 이어받기 시뮬레이터', '폰 바꿔도 신분증은 그대로 — 옛 폰의 모바일신분증으로 새 폰에 다시 받기', 3200);
+    for (const n of list) {
+      if (S.auto.stop) break;
+      S.caption = ''; await setup(n); render(); await showTitle(n);
+      const steps = STEPS[n].slice(0, opt.upto || STEPS[n].length);
+      await sleep(S.step * 0.4);
+      for (let i = 0; i < steps.length; i++) {
+        if (S.auto.stop) break;
+        const [who, a, label, hold = 0] = steps[i];
+        S.caption = `${SC[n].t} · ${i + 1}/${steps.length} · ${label}`; renderTop();
+        if (hold) await sleep(S.step < 500 ? 0 : hold);
+        const el = findAct(who, a);
+        if (!el) throw new Error(`자동 시연 ${n}번 ${i + 1}단계: 버튼을 찾지 못함 (${who}:${a})`);
+        el.classList.add('pulse'); await sleep(S.step * 0.4); el.classList.remove('pulse');
+        await doAct(who, a);
+        await sleep(S.step * 0.6);
+      }
+      if (list.length > 1) await sleep(S.step * 1.6);
+    }
+  } catch (e) { S.autoError = String(e.message || e); console.error(e); }
+  finally { S.auto = null; S.caption = ''; S.gi = opt.upto || (STEPS[S.sc] || []).length; render(); }
+}
+
+/* ───────── 검증 기록 내보내기 ───────── */
+function exportLog() {
+  const out = {
+    제목: '신분증 이어받기 시뮬레이터 — 공통기반 검증 기록',
+    주의: '시연용 가상 데이터입니다(실제 인물·실제 신분증 아님). 얼굴 인증·명의 확인·근거리 확인·창구 본인 확인은 시뮬레이션이고 전자서명·검증은 실제(WebCrypto)입니다.',
+    시나리오: SC[S.sc].t, 내보낸_실제시각: new Date().toISOString(), 가상시각: iso(S.now),
+    서명방식: 'ECDSA P-256 + SHA-256 (WebCrypto). 서명값은 r||s 64바이트를 16진수로 적음. 서명 대상은 키를 사전순으로 정렬한 JSON 문자열(UTF-8). 공개키는 SPKI(DER)를 16진수로 적음.',
+    발급기관_공개키_SPKI: H.issuer.spki, 발급기관_공개키_지문_SHA256: H.issuer.fp,
+    공통기반_공개키_SPKI: H.hub.spki, 공통기반_공개키_지문_SHA256: H.hub.fp,
+    기록: H.log.map(e => ({ 번호: e.id, 가상시각: iso(e.at), 종류: e.kind, 제목: e.title,
+      판정: e.ok === true ? '통과' : e.ok === false ? '거절' : '-', 내용: e.result || '',
+      검사: (e.checks || []).map(c => ({ 항목: c.n, 묶음: c.g !== undefined ? G5[c.g] : null, 결과: c.ok === true ? '통과' : c.ok === false ? '실패' : '검사 안 함', 시뮬레이션: c.sim, 설명: c.note })),
+      원자료: e.data || null })),
+  };
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); const t = kd(Date.now());
+  a.href = URL.createObjectURL(blob);
+  a.download = `verify-log_scenario${S.sc}_${t.getUTCFullYear()}${pad(t.getUTCMonth() + 1)}${pad(t.getUTCDate())}-${pad(t.getUTCHours())}${pad(t.getUTCMinutes())}${pad(t.getUTCSeconds())}.json`; // 한글 파일명은 일부 환경에서 'download'로 바뀌어 영문으로
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+/* ───────── 시험용 창구(자동 테스트·캡처에 씀) ───────── */
+window.__poc = {
+  ready: false,
+  setSpeed(ms) { S.step = ms; S.slow = ms < 500 ? 0.05 : 1; },
+  async scenario(n) { await setup(n); render(); },
+  async play(list, opt) { await autoplay(list, opt); return S.autoError; },
+  setTamper(t) { S.tamper = t; render(); },
+  async replay() { await replay(); render(); },
+  expand(id) { S.expanded.add(id); renderLog(true); const el = document.querySelector(`[data-id="${id}"]`); if (el) el.scrollIntoView({ block: 'center' }); },
+  guide() { const st = (STEPS[S.sc] || [])[S.gi]; const el = document.querySelector('.next'); const ph = el && el.closest('[data-who]');
+    return { step: st ? st[0] + ':' + st[1] : null, highlighted: el ? (ph ? ph.dataset.who : 'top') + ':' + el.dataset.act : null }; },
+  snapshot() {
+    const dv = d => ({ screen: d.screen, lost: d.lost, unused: d.unused, toast: d.toast, notice: d.notice ? d.notice.left : null, capBlocked: d.capBlocked,
+      alert: d.alert ? iso(d.alert.at) : null, near: d.near, counterDone: d.counterDone,
+      undoKey: d.undoKey ? { id: d.undoKey.payload.id, expiresAt: d.undoKey.payload.expiresAt, holderKeyFp: d.undoKey.payload.holderKeyFp } : null,
+      reject: d.reject ? { why: d.reject.why, visit: !!d.reject.visit, six: !!d.reject.six } : null,
+      cred: d.cred ? { id: d.cred.payload.id, status: (H.creds.get(d.cred.payload.id) || {}).status, transferCount: d.cred.payload.transferCount,
+        expiresAt: d.cred.payload.expiresAt, holderKeyFp: d.cred.payload.holderKeyFp, keyFp: d.keys && d.keys.fp } : null });
+    return { sc: S.sc, now: iso(S.now), old: dv(S.old), nw: dv(S.nw), activeNow: activeNow(), maxActive: H.maxActive,
+      transferNonces: [...H.nonces.values()].filter(r => r.kind === 'transfer').length,
+      undoKeys: [...H.undoKeys.values()].map(u => ({ id: u.payload.id, used: u.used, expired: u.expired })),
+      allCreds: [...H.creds.values()].map(c => ({ id: c.payload.id, status: c.status, issuedAt: c.payload.issuedAt, expiresAt: c.payload.expiresAt, lastInPersonAt: c.payload.lastInPersonAt })),
+      log: H.log.map(e => ({ id: e.id, at: iso(e.at), kind: e.kind, title: e.title, ok: e.ok, result: e.result, checks: (e.checks || []).map(c => [c.n, c.ok, !!c.sim, c.g === undefined ? null : c.g]) })) };
+  },
+};
+
+/* ───────── 시작 ───────── */
+(async () => {
+  const q = new URLSearchParams(location.search);
+  if (q.get('fast')) __poc.setSpeed(60);
+  fit();
+  await setup(Math.min(8, Math.max(1, +q.get('s') || 1)));
+  render(); fit();
+  __poc.ready = true;
+  if (q.get('auto')) autoplay(q.get('auto').split('').map(Number).filter(n => n >= 1 && n <= 8));
+})().catch(e => console.error(e));
+</script>
+</body>
+</html>
