@@ -1,5 +1,5 @@
-// 시연 영상 만들기 — 「자동 시연」으로 ①②⑧⑥⑦을 이어서 녹화 → 1920×1080 H.264 MP4
-// 화면이 바뀔 때마다 PNG 프레임을 받아(Chrome DevTools 화면 전송 기능) ffmpeg로 이어 붙임 — 글자가 흐려지지 않게
+// 시연 영상 만들기: 「자동 시연」으로 ①②⑧⑥⑦을 이어서 녹화 → 1920×1080 H.264 MP4
+// 화면이 바뀔 때마다 PNG 프레임을 받아(Chrome DevTools 화면 전송 기능) ffmpeg로 이어 붙임(글자가 흐려지지 않게)
 // 사용법: node make_video.js   (ffmpeg 필요)
 'use strict';
 const path = require('path');
@@ -63,6 +63,6 @@ const FPS = 30;
     '-tune', 'stillimage', '-movflags', '+faststart', '-an', OUT], { stdio: 'inherit' });
   const dur = execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', OUT]).toString().trim();
   fs.rmSync(tmp, { recursive: true, force: true });
-  console.log(`시연영상.mp4 — 길이 ${(+dur).toFixed(1)}초, 받은 프레임 ${frames.length}장, 녹화 시간 ${(t1 - t0).toFixed(1)}초`);
+  console.log(`시연영상.mp4: 길이 ${(+dur).toFixed(1)}초, 받은 프레임 ${frames.length}장, 녹화 시간 ${(t1 - t0).toFixed(1)}초`);
   console.log(errors.length ? '콘솔 오류: ' + errors.join(' | ') : '콘솔 오류 0건');
 })().catch(e => { console.error(e); process.exit(1); });
