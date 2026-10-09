@@ -1,6 +1,7 @@
 // 신분증 이어받기 시뮬레이터 자동 검사: Playwright + Chromium
 // 사용법: node run_tests.js   (결과는 같은 폴더 결과.txt 에 저장)
 'use strict';
+const norm = t => t == null ? t : t.replace(/\u00a0/g, ' ').replace(/\u2060/g, ''); // 줄바꿈 방지용 붙임 문자는 비교 전에 보통 글자로
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -119,7 +120,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
       ok('② 다른 사람 얼굴 → 새 폰 얼굴 단계에서 공통기반이 바로 거절', pre && pre.ok === false && failedOf(pre) === '얼굴 일치(공통기반 대조)');
       ok('② QR이 뜨지 않음(1회용 번호 발급 0건, 이어받기 요청 0건)', s.transferNonces === 0 && byKind(s, 'transfer').length === 0 && s.nw.screen === 'fail' && !s.nw.cred);
       ok('② 옛 폰(명의자)에 알림 → 신고 접수, 옛 폰 신분증은 그대로', pre.result.includes('명의자 폰에 알림') && byKind(s, 'report').length === 1 && s.old.cred.status === 'active' && !s.old.alert); },
-    3: async s => { const txt = await page.textContent('#nw');
+    3: async s => { const txt = norm(await page.textContent('#nw'));
       ok('③ 옛 폰 분실: 옛 폰 칸 비활성, 분실 신고로 정지', s.old.lost && s.old.cred.status === 'suspended');
       ok('③ 새 폰에 「주민센터 방문 / IC 주민등록증」 안내, 이어받기 요청 없음', s.nw.screen === 'nophone' && txt.includes('주민센터 방문') && txt.includes('IC 주민등록증') && byKind(s, 'transfer').length === 0); },
     4: s => { const tr = byKind(s, 'transfer');
@@ -127,16 +128,16 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
       ok('④ +30일 뒤 다시 하면 통과(이어받기 2회차)', tr[1] && tr[1].ok === true && s.nw.cred && s.nw.cred.transferCount === 2); },
     5: async s => { const tr = byKind(s, 'transfer')[0], rn = byKind(s, 'renew')[0], nt = byKind(s, 'notice');
       ok('⑤ 대면 확인 6년 안이라 이어받기는 통과, 새 만료일은 대면 확인+6년(2031. 4. 14.)으로 맞춤',
-        tr && tr.ok === true && tr.result.includes('대면확인+6년으로 맞춤') && s.nw.cred && s.nw.cred.expiresAt.startsWith('2031-04-14') && Date.parse(s.nw.cred.expiresAt) === plus6y(s.allCreds.find(c => c.id === s.nw.cred.id).lastInPersonAt));
+        tr && tr.ok === true && norm(tr.result).includes('대면확인+6년으로 맞춤') && s.nw.cred && s.nw.cred.expiresAt.startsWith('2031-04-14') && Date.parse(s.nw.cred.expiresAt) === plus6y(s.allCreds.find(c => c.id === s.nw.cred.id).lastInPersonAt));
       ok('⑤ 만료 60일 전 알림은 정확히 60일 전(2031. 2. 13. 14:20)에 한 번만', nt.length === 1 && nt[0].at.startsWith('2031-02-13T14:20') && nt[0].result.includes('60일 남음'));
-      ok('⑤ 갱신 시도 → 「6년 상한」에서 거절, IC 주민등록증 전환 안내', rn && rn.ok === false && failedOf(rn) === '6년 상한' && s.nw.screen === 'rejected' && s.nw.reject.six && (await page.textContent('#nw')).includes('IC 주민등록증으로 바꾸기'));
+      ok('⑤ 갱신 시도 → 「6년 상한」에서 거절, IC 주민등록증 전환 안내', rn && rn.ok === false && failedOf(rn) === '6년 상한' && s.nw.screen === 'rejected' && s.nw.reject.six && (norm(await page.textContent('#nw'))).includes('IC 주민등록증으로 바꾸기'));
       ok('⑤ 기록 시각이 앞뒤로 엇갈리지 않음', s.log.every((e, i) => i === 0 || Date.parse(s.log[i - 1].at) <= Date.parse(e.at)));
       await page.click('#nw [data-act="ok"]'); await page.waitForTimeout(100);
-      const t1 = await page.textContent('#nw');
+      const t1 = norm(await page.textContent('#nw'));
       ok('⑤ 새 폰 신분증에 「대면 확인 6년 상한」 표시, 알림은 「갱신 대신 방문」으로 바뀜', t1.includes('대면 확인 6년 상한') && t1.includes('2031. 4. 14.까지') && t1.includes('갱신 대신 방문'));
       await page.click('#top [data-act="t30"]'); await idle(page);
       await page.click('#top [data-act="t30"]'); await idle(page);
-      const t2 = await page.textContent('#nw'); const s2 = await snap(page);
+      const t2 = norm(await page.textContent('#nw')); const s2 = await snap(page);
       const ex = s2.log.find(e => e.title === '유효기간 만료');
       ok('⑤ 6년이 지나면 만료: 「대면 확인 후 6년이 지났어요」와 방문 안내, 제출·이어주기 버튼 없음',
         t2.includes('대면 확인 후 6년이 지났어요') && t2.includes('IC 주민등록증으로 바꾸기') && !(await page.isVisible('#nw [data-act="present-open"]')) && ex && ex.at.startsWith('2031-04-14T14:20'));
@@ -175,10 +176,10 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
   }
   // 중간 장면 확인
   await play(page, [2], { upto: 3 });
-  const t2 = await page.textContent('#old');
+  const t2 = norm(await page.textContent('#old'));
   ok('② 옛 폰 알림 문구 「내 명의로 이어받기 시도가 있었어요」 + 신고 버튼', t2.includes('내 명의로 이어받기 시도가 있었어요') && t2.includes('내가 한 게 아니면 신고') && await page.isVisible('#old [data-act="report"]'));
   await play(page, [8], { upto: 6 });
-  const t8 = await page.textContent('#old');
+  const t8 = norm(await page.textContent('#old'));
   ok('⑧ 옛 폰 승인 화면에 「가까이 없음」과 사기 경고, 얼굴은 「일치 확인됨(공통기반 대조)」', t8.includes('가까이 없음') && t8.includes('QR 화면을 보내 찍으라고 했다면 사기') && t8.includes('일치 확인됨(공통기반 대조)'));
   log('');
 
@@ -189,7 +190,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     const g0 = await p.evaluate(() => __poc.guide());
     ok('처음엔 새 폰 「옛 폰에서 이어받기」에 주황 테두리', g0.highlighted === 'nw:start-transfer');
     await p.click('#old [data-act="give-start"]'); await idle(p);
-    const strip = await p.textContent('#strip'); const s0 = await snap(p);
+    const strip = norm(await p.textContent('#strip')); const s0 = await snap(p);
     ok('옛 폰부터 누르면 「새 폰에서 먼저 시작해요」 안내, 옛 폰은 넘어가지 않음', strip.includes('새 폰에서 먼저 시작해요') && s0.old.screen === 'home');
     const click = async (who, act) => { await p.click(`#${who} [data-act="${act}"]`); await idle(p); };
     await click('nw', 'start-transfer');
@@ -202,16 +203,16 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     for (let i = 0; i < 6; i++) await p.click('#old .keypad button[data-act="pin-digit"] >> nth=' + i);
     await p.waitForFunction(() => S.busy === 0 && S.old.screen === 'scan');
     await click('old', 'scan');
-    const ap = await p.textContent('#old');
+    const ap = norm(await p.textContent('#old'));
     ok('승인 화면: 명의 확인됨 · 얼굴 「일치 확인됨(공통기반 대조)」 · 두 폰 「가까이 있음(블루투스)」 · 경고문 (「얼굴 인증 완료」 문구 없음)',
       ap.includes('확인됨') && ap.includes('일치 확인됨(공통기반 대조)') && ap.includes('가까이 있음(블루투스)') && ap.includes('누가 전화로 시켜서 하는 거라면 지금 멈추세요') && !ap.includes('얼굴 인증'));
     await click('old', 'approve');
     const s = await snap(p); const tr = byKind(s, 'transfer')[0];
     ok('직접 클릭으로 이어받기 성공', tr && tr.ok === true && s.nw.screen === 'home' && s.nw.cred.transferCount === 1);
-    const nwText = await p.textContent('#nw');
+    const nwText = norm(await p.textContent('#nw'));
     ok('새 폰 신분증 화면: 이름·가린 주민번호·유효기간·「이어받기 1회차」·보호 중', nwText.includes('김민수') && nwText.includes('580314-1●●●●●●') && nwText.includes('유효기간') && nwText.includes('이어받기 1회차') && nwText.includes('보호 중'));
     await p.click('#log [data-ent]:has-text("이어받기 요청")');
-    const det = await p.textContent('#log .det'); const g5 = await p.textContent('#log .g5');
+    const det = norm(await p.textContent('#log .det')); const g5 = norm(await p.textContent('#log .g5'));
     ok('기록 줄: 「다섯 가지 확인(세부 검사 11개)」로 묶여 보이고, 누르면 서명값(16진수)과 verify 결과가 펼쳐짐',
       g5.includes('다섯 가지 확인') && g5.includes('세부 검사 11개') && G5.every(n => g5.includes(n)) && /[0-9a-f]{24}…/.test(det) && det.includes('verify = true') && det.includes('공통기반 서명'));
     await p.close();
@@ -226,7 +227,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     const s = await snap(p);
     const oldId = s.allCreds.find(c => c.issuedAt.startsWith('2025-04-14')).id;
     ok('이어받는 즉시 옛 폰 신분증은 폐기 목록, 쓸 수 있는 신분증은 새 폰 것 1개', s.allCreds.find(c => c.id === oldId).status === 'revoked' && s.activeNow === 1);
-    const oldText = await p.textContent('#old');
+    const oldText = norm(await p.textContent('#old'));
     ok('옛 폰 화면: 「이 폰의 신분증은 새 폰으로 옮겨졌어요 · 72시간 안에 되돌릴 수 있어요」 + 「내가 하지 않았어요」만',
       !s.old.cred && oldText.includes('새 폰으로 옮겨졌어요') && oldText.includes('72시간 안에 되돌릴 수 있어요') && await p.isVisible('#old [data-act="undo-open"]') && !(await p.isVisible('#old [data-act="present-open"]')));
     const uk = await p.evaluate(async () => { const u = S.old.undoKey; return { bound: u.payload.holderKeyFp === S.old.keys.fp,
@@ -287,7 +288,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     await c.click('#counter [data-act="counter-ok"]'); await idle(c);
     await c.click('#counter [data-act="counter-close"]');
     sc = await snap(c); const yes = byKind(sc, 'counter')[1];
-    const ot = await c.textContent('#old');
+    const ot = norm(await c.textContent('#old'));
     ok('옛 폰 없이 창구에서 본인 확인 → 새 폰 신분증 바로 폐기, 되돌리기 열쇠 사용 처리, 방문·IC로 다시 받기 안내',
       yes && yes.ok === true && sc.nw.cred.status === 'revoked' && sc.undoKeys[0].used && sc.activeNow === 0 && ot.includes('분실 신고 창구에서') && yes.result.includes('IC 주민등록증'));
     ok('되돌린 뒤에는 창구 버튼이 다시 잠김', !(await c.isEnabled('#counterBtn')));
@@ -390,7 +391,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     const c = await browser.newContext({ viewport: { width: w, height: 700 } });
     const p = await open(c, FILE_URL, `${w}px`);
     const v = await p.isVisible('#narrow');
-    ok(`${w}px: 「PC 화면에서 열어 주세요」 안내 ${vis ? '보임' : '안 보임'}`, v === vis && (!vis || (await p.textContent('#narrow')).includes('PC 화면에서 열어 주세요')));
+    ok(`${w}px: 「PC 화면에서 열어 주세요」 안내 ${vis ? '보임' : '안 보임'}`, v === vis && (!vis || (norm(await p.textContent('#narrow'))).includes('PC 화면에서 열어 주세요')));
     await c.close();
   }
   log('');
@@ -401,7 +402,7 @@ const sendHtml = (req, res) => { res.writeHead(200, { 'Content-Type': 'text/html
     const html = fs.readFileSync(HTML, 'utf8'), readme = fs.readFileSync(README, 'utf8');
     const p = await open(ctx, FILE_URL, '이름');
     const opts = await p.$$eval('#sc option', os => os.map(o => o.textContent.trim()));
-    const title = await p.title(); const brand = await p.textContent('.brand b');
+    const title = await p.title(); const brand = norm(await p.textContent('.brand b'));
     await p.close();
     ok('드롭다운 시나리오 이름 8개가 확정 문구와 똑같음', opts.length === 8 && opts.every((t, i) => t === NAMES[i]));
     ok('도움말·README에도 확정 시나리오 이름 8개', NAMES.every(n => html.includes(n) && readme.includes(n)));

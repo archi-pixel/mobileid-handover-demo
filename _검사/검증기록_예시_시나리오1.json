@@ -2,13 +2,13 @@
   "제목": "신분증 이어받기 시뮬레이터: 공통기반 검증 기록",
   "주의": "시연용 가상 데이터입니다(실제 인물·실제 신분증 아님). 얼굴 인증·명의 확인·근거리 확인·창구 본인 확인은 시뮬레이션이고 전자서명·검증은 실제(WebCrypto)입니다.",
   "시나리오": "① 정상 이어받기",
-  "내보낸_실제시각": "2026-10-08T10:52:10.381Z",
+  "내보낸_실제시각": "2026-10-09T01:12:07.235Z",
   "가상시각": "2026-10-11T10:05:00+09:00",
   "서명방식": "ECDSA P-256 + SHA-256 (WebCrypto). 서명값은 r||s 64바이트를 16진수로 적음. 서명 대상은 키를 사전순으로 정렬한 JSON 문자열(UTF-8). 공개키는 SPKI(DER)를 16진수로 적음.",
-  "발급기관_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d03010703420004873a54a0a502e0eefcb074017d3b0de3593d8bcf2d67598fd98482da4a0a098c659989057604eea512ed10ad326d3a7aed9b9df62275c742389e3dc51d9e96ed",
-  "발급기관_공개키_지문_SHA256": "1b4982a46bdf283dbf07b2163258113a060ee5a3390e89e086e9fba288c2c5c3",
-  "공통기반_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d03010703420004efbfb6d580025a2986745c5be671a34adeaa40dccd6382488044f4c39f496d7a8c6437a10cfbb7298a712db4b49eb3eb21d597de86d8eec032c5349d23059109",
-  "공통기반_공개키_지문_SHA256": "3105afffdf5ad59c2fba0d70b99e4220931fb556196b4ae49b81af6cf3b0d1c7",
+  "발급기관_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d030107034200041070eb3d932751d1db3367f0e45825ceab1707ecd63f3fbc8c353f3735db02df3ad4385e023c50505af3027737aa6361bd10ce813f723f2aa5fc8d520216f400",
+  "발급기관_공개키_지문_SHA256": "0001137c3bd86bb270ab89bd6d1b04fa584dda9150443dfa1eb0ade845f23206",
+  "공통기반_공개키_SPKI": "3059301306072a8648ce3d020106082a8648ce3d030107034200040ff7aa17427a8b28afc44c1b83084162c77a6efa7268ade9c4e228693a0439e1a1aa82133a98e588c800d2299ab65acf3f71d6ffbaae7da2ad37b8c7be56c3e0",
+  "공통기반_공개키_지문_SHA256": "0a0d4cd69915b5bab0be2f7a191dec72382dd6f9c64cecc52a9d2b95fe994679",
   "기록": [
     {
       "번호": 1,
@@ -37,9 +37,9 @@
         }
       ],
       "원자료": {
-        "newPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d030107034200043daa5ef85902dd6788d35ab698e93dcd066339455e904223bbeda9ffa566b99f2cf0b8e30445877505700f35c5319ed0c3c805c614b5188d21f4b31f746b47b6",
-        "newPhoneKeyFp": "1b2a12e1d6e605d0239c6741420302e21c3605ee3c28a191f4004d18a45e0123",
-        "nonce": "51cba4fedb0606311fceb517341b781e"
+        "newPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d03010703420004da8aa52de62e88fb5effcbac0eed6135f719f258ad525938177e3b600d556fae9aa2dc54bbe81ad76f9bd2565ce86794ec2012e777ebc120a0a9ad2a05760f9e",
+        "newPhoneKeyFp": "5d0092a75bf9de6dc02885e760e59a9fe0dbc7fa88652d96f9d85c914b995b1e",
+        "nonce": "67842f7a86996223c1b6fd297817ce75"
       }
     },
     {
@@ -131,58 +131,58 @@
       "원자료": {
         "cred": {
           "payload": {
-            "id": "MID-1F731F",
+            "id": "MID-EED100",
             "type": "주민등록증",
             "name": "김민수",
             "birth": "1958-03-14",
-            "holderKeyFp": "fb2d42d9ad032348424e9886e261dbd84bb1904eb52418915a2f9e65996c51aa",
+            "holderKeyFp": "e1b15c8311af93a152ff0f3d5d2c5562dd9e0fedb203142780c04c0321564398",
             "issuedAt": "2025-04-14T14:20:00+09:00",
             "expiresAt": "2028-04-14T14:20:00+09:00",
             "lastInPersonAt": "2025-04-14T14:20:00+09:00",
             "transferCount": 0,
             "issuer": "가상 발급기관(시연용)"
           },
-          "sig": "47d3a8c017160e20a092b78851bfececee07966eff090ed0d3e23c8630f460b903035d80a3340625720f4bc74bfe8a3e06dcab91724d6f1833f2f5b7a649a235"
+          "sig": "04aec5419faee4ead8e4919836013ceb10e5947add883b5d896a6191102903d1b13d8f0ea9766c1dac2a1d29f1e077b394839a5b4b7ca0bfe6a6e8a4e8c2a300"
         },
-        "oldPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d030107034200047c82cbf7b62cab83d3fe5f4209214317a72cf80d3c15f9fdc3df135e0487ed549323073942f23f2b831e6ae6ccae2132955b7af86fe13e86a3f9e3fd39d40223",
+        "oldPhoneSpki": "3059301306072a8648ce3d020106082a8648ce3d0301070342000483b530e20c754fc9756b3529103eaf147dddfc786d541d0021cb9c062a65c3ad72c3fcd0b6f73e8edac7916e3eee5afeda457ed220fa2ba7f420a888c7a21844",
         "approval": {
           "type": "이어받기 승인",
-          "credId": "MID-1F731F",
-          "newKeyFp": "1b2a12e1d6e605d0239c6741420302e21c3605ee3c28a191f4004d18a45e0123",
-          "nonce": "51cba4fedb0606311fceb517341b781e",
-          "nearToken": "ccf0f5b815cc674e",
+          "credId": "MID-EED100",
+          "newKeyFp": "5d0092a75bf9de6dc02885e760e59a9fe0dbc7fa88652d96f9d85c914b995b1e",
+          "nonce": "67842f7a86996223c1b6fd297817ce75",
+          "nearToken": "67c8b3d43e88361f",
           "requestedAt": "2026-10-08T10:01:00+09:00",
           "approvedAt": "2026-10-08T10:02:00+09:00"
         },
-        "approvalSig": "5c9061e99e19381a92e485afe7b56e781b044b4d5669ada9572036ee4663e8f4db0dd391f68403392ad6f614cda692fe107824dd844d1837f78124ce198db66e",
+        "approvalSig": "2369ab8e43a16dfa667bf968797f775186e0d5ea9634247dbdcf9bece64867048be29de24c575a49f75c99d7b81dd92c7b62a07b238dd830c1d45f0ec603f90c",
         "newCred": {
           "payload": {
-            "id": "MID-9B00F2",
+            "id": "MID-22592F",
             "type": "주민등록증",
             "name": "김민수",
             "birth": "1958-03-14",
-            "holderKeyFp": "1b2a12e1d6e605d0239c6741420302e21c3605ee3c28a191f4004d18a45e0123",
+            "holderKeyFp": "5d0092a75bf9de6dc02885e760e59a9fe0dbc7fa88652d96f9d85c914b995b1e",
             "issuedAt": "2026-10-08T10:02:00+09:00",
             "expiresAt": "2029-10-08T10:02:00+09:00",
             "lastInPersonAt": "2025-04-14T14:20:00+09:00",
             "transferCount": 1,
             "issuer": "가상 발급기관(시연용)"
           },
-          "sig": "d08418e56c738ad278c8f2a0a55fe08f01a20cc6df42eabea51f3d26fd3a619941ad4b3d4cd81fbcb31e8e9164c58c4c8cc22a88bc4c70df4ff9737e75b4a95f"
+          "sig": "6425e535aa644e1c3d9dce118bddce11c2e751b9adbbd2299bb23f68ca3d1285e7855442b9481acc59d0be8e3cbe0ae96bb676daa4a0b6885b466a113a6d3cdd"
         },
         "undoKey": {
           "payload": {
-            "id": "UNDO-C42C67",
+            "id": "UNDO-D4E9CD",
             "type": "되돌리기 열쇠",
-            "holderKeyFp": "fb2d42d9ad032348424e9886e261dbd84bb1904eb52418915a2f9e65996c51aa",
-            "oldCredId": "MID-1F731F",
-            "newCredId": "MID-9B00F2",
+            "holderKeyFp": "e1b15c8311af93a152ff0f3d5d2c5562dd9e0fedb203142780c04c0321564398",
+            "oldCredId": "MID-EED100",
+            "newCredId": "MID-22592F",
             "issuedAt": "2026-10-08T10:02:00+09:00",
             "expiresAt": "2026-10-11T10:02:00+09:00",
             "oneTime": true,
             "signer": "공통기반(시연용)"
           },
-          "sig": "8335a278bea626e6d84a4c210569add6fc2e22f92a606a5b5d36b77cce58ca9083e7c8fb7418879f52de09353631e5fb80b6340c179ec47df72e29c1c98e8434"
+          "sig": "189463c8ba16e8f48b6b347eed3913c8ba60f70e371c191b0e960d0e945e63b6acb1ece9d40490257b8102a24d8fcf80f275acbc9e8df79f272b841603060312"
         },
         "tamper": null
       }
@@ -241,28 +241,28 @@
       "원자료": {
         "cred": {
           "payload": {
-            "id": "MID-9B00F2",
+            "id": "MID-22592F",
             "type": "주민등록증",
             "name": "김민수",
             "birth": "1958-03-14",
-            "holderKeyFp": "1b2a12e1d6e605d0239c6741420302e21c3605ee3c28a191f4004d18a45e0123",
+            "holderKeyFp": "5d0092a75bf9de6dc02885e760e59a9fe0dbc7fa88652d96f9d85c914b995b1e",
             "issuedAt": "2026-10-08T10:02:00+09:00",
             "expiresAt": "2029-10-08T10:02:00+09:00",
             "lastInPersonAt": "2025-04-14T14:20:00+09:00",
             "transferCount": 1,
             "issuer": "가상 발급기관(시연용)"
           },
-          "sig": "d08418e56c738ad278c8f2a0a55fe08f01a20cc6df42eabea51f3d26fd3a619941ad4b3d4cd81fbcb31e8e9164c58c4c8cc22a88bc4c70df4ff9737e75b4a95f"
+          "sig": "6425e535aa644e1c3d9dce118bddce11c2e751b9adbbd2299bb23f68ca3d1285e7855442b9481acc59d0be8e3cbe0ae96bb676daa4a0b6885b466a113a6d3cdd"
         },
-        "phoneSpki": "3059301306072a8648ce3d020106082a8648ce3d030107034200043daa5ef85902dd6788d35ab698e93dcd066339455e904223bbeda9ffa566b99f2cf0b8e30445877505700f35c5319ed0c3c805c614b5188d21f4b31f746b47b6",
+        "phoneSpki": "3059301306072a8648ce3d020106082a8648ce3d03010703420004da8aa52de62e88fb5effcbac0eed6135f719f258ad525938177e3b600d556fae9aa2dc54bbe81ad76f9bd2565ce86794ec2012e777ebc120a0a9ad2a05760f9e",
         "request": {
           "type": "제출",
           "purpose": "휴대폰 개통",
-          "credId": "MID-9B00F2",
-          "nonce": "4b00ba568947b0228473d4b554e3f83c",
+          "credId": "MID-22592F",
+          "nonce": "0e227aa6f8c0468b47a64fd35491e9f3",
           "at": "2026-10-08T10:03:00+09:00"
         },
-        "signature": "29f8970b97067c5e142687fb2dd12ac76e6be78cfd03f6c84225ea4f946d5a82f659450c6f52cd1d2f32d7083fded17ea12307a1ca82018c520f193735163a2e"
+        "signature": "a57ace483f329fb10582b7a8ab2e790bfa218d88e28f3836dd43bf0d22bac5f1088352acc0e57e776ec648c56294a94d546bd006237552ea1588489930a50eee"
       }
     },
     {
@@ -312,28 +312,28 @@
       "원자료": {
         "cred": {
           "payload": {
-            "id": "MID-9B00F2",
+            "id": "MID-22592F",
             "type": "주민등록증",
             "name": "김민수",
             "birth": "1958-03-14",
-            "holderKeyFp": "1b2a12e1d6e605d0239c6741420302e21c3605ee3c28a191f4004d18a45e0123",
+            "holderKeyFp": "5d0092a75bf9de6dc02885e760e59a9fe0dbc7fa88652d96f9d85c914b995b1e",
             "issuedAt": "2026-10-08T10:02:00+09:00",
             "expiresAt": "2029-10-08T10:02:00+09:00",
             "lastInPersonAt": "2025-04-14T14:20:00+09:00",
             "transferCount": 1,
             "issuer": "가상 발급기관(시연용)"
           },
-          "sig": "d08418e56c738ad278c8f2a0a55fe08f01a20cc6df42eabea51f3d26fd3a619941ad4b3d4cd81fbcb31e8e9164c58c4c8cc22a88bc4c70df4ff9737e75b4a95f"
+          "sig": "6425e535aa644e1c3d9dce118bddce11c2e751b9adbbd2299bb23f68ca3d1285e7855442b9481acc59d0be8e3cbe0ae96bb676daa4a0b6885b466a113a6d3cdd"
         },
-        "phoneSpki": "3059301306072a8648ce3d020106082a8648ce3d030107034200043daa5ef85902dd6788d35ab698e93dcd066339455e904223bbeda9ffa566b99f2cf0b8e30445877505700f35c5319ed0c3c805c614b5188d21f4b31f746b47b6",
+        "phoneSpki": "3059301306072a8648ce3d020106082a8648ce3d03010703420004da8aa52de62e88fb5effcbac0eed6135f719f258ad525938177e3b600d556fae9aa2dc54bbe81ad76f9bd2565ce86794ec2012e777ebc120a0a9ad2a05760f9e",
         "request": {
           "type": "제출",
           "purpose": "일반 신원확인",
-          "credId": "MID-9B00F2",
-          "nonce": "a85c1b5bdcf28a5c67bc2abb83d00720",
+          "credId": "MID-22592F",
+          "nonce": "09626b9d722de18e39fb34a982d908fa",
           "at": "2026-10-08T10:04:00+09:00"
         },
-        "signature": "67d90ed77ae77a6326b3cd2c4e1f6d0b88afce64f78f0df73edc59a94b5b0e3c17d3e5325ba08dc413e487e179b08fe20188ec75f95da92f0bb57ed47136ad18"
+        "signature": "c7698536284f80721d2c13fab8e085699533e896cf5898f15c543f748a0a8b29d5d296563f95acc099107722f6da9900bfd0a8dea0e86a6e335bda16f17098ac"
       }
     },
     {
@@ -410,28 +410,28 @@
       "원자료": {
         "cred": {
           "payload": {
-            "id": "MID-9B00F2",
+            "id": "MID-22592F",
             "type": "주민등록증",
             "name": "김민수",
             "birth": "1958-03-14",
-            "holderKeyFp": "1b2a12e1d6e605d0239c6741420302e21c3605ee3c28a191f4004d18a45e0123",
+            "holderKeyFp": "5d0092a75bf9de6dc02885e760e59a9fe0dbc7fa88652d96f9d85c914b995b1e",
             "issuedAt": "2026-10-08T10:02:00+09:00",
             "expiresAt": "2029-10-08T10:02:00+09:00",
             "lastInPersonAt": "2025-04-14T14:20:00+09:00",
             "transferCount": 1,
             "issuer": "가상 발급기관(시연용)"
           },
-          "sig": "d08418e56c738ad278c8f2a0a55fe08f01a20cc6df42eabea51f3d26fd3a619941ad4b3d4cd81fbcb31e8e9164c58c4c8cc22a88bc4c70df4ff9737e75b4a95f"
+          "sig": "6425e535aa644e1c3d9dce118bddce11c2e751b9adbbd2299bb23f68ca3d1285e7855442b9481acc59d0be8e3cbe0ae96bb676daa4a0b6885b466a113a6d3cdd"
         },
-        "phoneSpki": "3059301306072a8648ce3d020106082a8648ce3d030107034200043daa5ef85902dd6788d35ab698e93dcd066339455e904223bbeda9ffa566b99f2cf0b8e30445877505700f35c5319ed0c3c805c614b5188d21f4b31f746b47b6",
+        "phoneSpki": "3059301306072a8648ce3d020106082a8648ce3d03010703420004da8aa52de62e88fb5effcbac0eed6135f719f258ad525938177e3b600d556fae9aa2dc54bbe81ad76f9bd2565ce86794ec2012e777ebc120a0a9ad2a05760f9e",
         "request": {
           "type": "제출",
           "purpose": "휴대폰 개통",
-          "credId": "MID-9B00F2",
-          "nonce": "38b5f078e1c6e718b9d9e687406a3405",
+          "credId": "MID-22592F",
+          "nonce": "81105aab96d1a86153cade762920f48b",
           "at": "2026-10-11T10:05:00+09:00"
         },
-        "signature": "96e450c1612a82129afc533c383db9310419411ad4eda5c95ad2b7e31442357ce830f09b77a2eee70cefe01716ddf89a763567111c24638cc03f61e5284343e6"
+        "signature": "95d7df80d972978fdfb8ea768c8435ddf284153fc184aefea852a9401c129aa2793c6381fc4c4c9ab5e50f221ce1687147f15414b47505d9b3ec3d48cb72e478"
       }
     }
   ]
